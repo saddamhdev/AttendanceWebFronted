@@ -4,11 +4,14 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
-    id: "",
+    id: "", // Added ID field
     name: "",
     designation: "",
-    joinDate: new Date().toISOString().split("T")[0],
+    joinDate: new Date().toISOString().split("T")[0], // Default to today
   });
+
+  const [loading, setLoading] = useState(false); // Loading state
+  const [message, setMessage] = useState(""); // Success/error message
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -16,23 +19,26 @@ const RegistrationForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setLoading(true);
+    setMessage("");
+
     try {
-      const response = await axios.post("http://localhost:8080/api/employees/add", formData);
+      const response = await axios.post("http://localhost:8080/login/insert", formData);
       console.log("Employee Added:", response.data);
-      alert("Employee added successfully!");
+      setMessage("Employee added successfully!");
       
-      // Clear form fields
+      // Reset form fields
       setFormData({
         id: "",
         name: "",
         designation: "",
         joinDate: new Date().toISOString().split("T")[0],
       });
-      
     } catch (error) {
       console.error("Error adding employee:", error);
-      alert("Failed to add employee.");
+      setMessage("Failed to add employee.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -40,6 +46,13 @@ const RegistrationForm = () => {
     <div className="container mt-4">
       <div className="card shadow p-4">
         <h4 className="text-center mb-3">Employee Registration</h4>
+
+        {message && (
+          <div className={`alert ${message.includes("success") ? "alert-success" : "alert-danger"}`} role="alert">
+            {message}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
             <label className="form-label">ID</label>
@@ -47,9 +60,10 @@ const RegistrationForm = () => {
               type="text"
               name="id"
               className="form-control"
-              placeholder="Enter ID"
+              placeholder="Enter Employee ID"
               value={formData.id}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -62,6 +76,7 @@ const RegistrationForm = () => {
               placeholder="Enter Name"
               value={formData.name}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -74,6 +89,7 @@ const RegistrationForm = () => {
               placeholder="Enter Designation"
               value={formData.designation}
               onChange={handleChange}
+              required
             />
           </div>
 
@@ -85,10 +101,13 @@ const RegistrationForm = () => {
               className="form-control"
               value={formData.joinDate}
               onChange={handleChange}
+              required
             />
           </div>
 
-          <button type="submit" className="btn btn-success w-100">Add Employee</button>
+          <button type="submit" className="btn btn-success w-100" disabled={loading}>
+            {loading ? "Adding..." : "Add Employee"}
+          </button>
         </form>
       </div>
     </div>
