@@ -14,7 +14,7 @@ const Login = () => {
     if (email === "admin@example.com" && password === "password") {
       navigate("/home"); // Redirect to home page
     } else {
-        navigate("/reg"); // Redirect to error page on failure
+        navigate("/error"); // Redirect to error page on failure
     }
   };
 
