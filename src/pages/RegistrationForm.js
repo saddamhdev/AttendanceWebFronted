@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-import axios from "axios";
+import { addEmployee } from "../services/employeeService"; // Import the service
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
-    id: "", // Added ID field
+    idNumber: "",
     name: "",
     designation: "",
-    joinDate: new Date().toISOString().split("T")[0], // Default to today
+    joinDate: new Date().toISOString().split("T")[0],
   });
 
-  const [loading, setLoading] = useState(false); // Loading state
-  const [message, setMessage] = useState(""); // Success/error message
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -23,13 +23,12 @@ const RegistrationForm = () => {
     setMessage("");
 
     try {
-      const response = await axios.post("http://localhost:8080/login/insert", formData);
-      console.log("Employee Added:", response.data);
+      await addEmployee(formData);
       setMessage("Employee added successfully!");
-      
-      // Reset form fields
+
+      // Reset form
       setFormData({
-        id: "",
+        idNumber: "",
         name: "",
         designation: "",
         joinDate: new Date().toISOString().split("T")[0],
@@ -58,10 +57,10 @@ const RegistrationForm = () => {
             <label className="form-label">ID</label>
             <input
               type="text"
-              name="id"
+              name="idNumber"
               className="form-control"
               placeholder="Enter Employee ID"
-              value={formData.id}
+              value={formData.idNumber}
               onChange={handleChange}
               required
             />

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import "bootstrap/dist/css/bootstrap.min.css";
 
-const Login = () => {
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate(); // Initialize useNavigate
@@ -17,6 +17,11 @@ const Login = () => {
         navigate("/reg"); // Redirect to error page on failure
     }
   };
+  const handleEmail = (e) => {
+    setEmail(e.target.value)
+  }
+
+
 
   return (
     <div className="d-flex justify-content-center align-items-center vh-100" style={{ backgroundColor: "#f4f6f9" }}>
@@ -30,7 +35,7 @@ const Login = () => {
               className="form-control" 
               placeholder="Enter your email" 
               value={email} 
-              onChange={(e) => setEmail(e.target.value)} 
+              onChange={(e) => handleEmail(e)} 
               required 
             />
           </div>
@@ -50,6 +55,6 @@ const Login = () => {
       </div>
     </div>
   );
-};
+}
 
-export default Login;
+ 
