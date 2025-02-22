@@ -1,7 +1,7 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/login/insert"; // Your backend API URL
-const GET_API_URL = "http://localhost:8080/login/getAll"; // Assuming your API has a GET endpoint for all employees
+const API_URL = "http://localhost:8080/api/user/insert"; // Your backend API URL
+const GET_API_URL = "http://localhost:8080/api/user/getAll"; // Assuming your API has a GET endpoint for all employees
 
 const addEmployee = async (employeeData, size) => {
   try {

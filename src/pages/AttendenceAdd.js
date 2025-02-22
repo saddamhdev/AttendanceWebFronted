@@ -1,17 +1,69 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { Table, Form, Button } from "react-bootstrap";
 import Navbar from "../layouts/Navbar";
+import { getAllEmployees } from "../services/employeeService";
+import { saveAttendance } from "../services/attendanceDataService";
 
 const AttendanceSheet = () => {
-  const [employees, setEmployees] = useState([
-    { id: 1, name: "45353", startHour: "9", startMinute: "0", startPeriod: "AM", exitHour: "5", exitMinute: "0", exitPeriod: "PM", outHour: "0", outMinute: "0", status: "Present" },
-    { id: 2, name: "dsfsdfds", startHour: "9", startMinute: "0", startPeriod: "AM", exitHour: "5", exitMinute: "0", exitPeriod: "PM", outHour: "0", outMinute: "0", status: "Present" },
+  const [user, setUser] = useState([])
+  const [employees, setEmployees] = useState([ 
   ]);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
+
+  const handleDateChange = (e) => {
+    setSelectedDate(e.target.value);
+    setEmployees([...employees.map(emp => ({ ...emp, date: e.target.value }))]);
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return date.toLocaleDateString("en-US", options);
+  };
+
+  const getMonthName = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleString("en-US", { month: "long" }).toUpperCase();
+  };
+  useEffect(() => {
+    const fetchEmployees = async () => {
+      try {
+        const response = await getAllEmployees("1");
+        console.log("Fetched employees:", response);
+        if (Array.isArray(response)) {
+          setEmployees(response.map(emp => ({
+            date: selectedDate,
+            employeeId: emp.idNumber, // Fixed syntax error
+            name: emp.name,
+            startHour: "9",
+            startMinute: "0",
+            lateEntryReason: "",
+            startPeriod: "AM",
+            exitHour: "5",
+            exitMinute: "0",
+            exitPeriod: "PM",
+            outHour: "0",
+            outMinute: "0",
+            status: "Present",
+          })));
+        }
+      } catch (error) {
+        console.error("Error fetching employees:", error);
+      }
+    };
+    fetchEmployees();
+  }, []);
+
 
   const handleInputChange = (e, index, field) => {
     const newEmployees = [...employees];
     newEmployees[index][field] = e.target.value;
     setEmployees(newEmployees);
+  };
+
+  const handleSubmit = async () => {
+    const response = await saveAttendance(employees);
+    alert(response.message);
   };
 
   return (
@@ -20,18 +72,28 @@ const AttendanceSheet = () => {
      <Navbar/>
 
     <div className="container mt-4" style={{ paddingTop: "100px" }}>
-      <div className="d-flex align-items-center mb-3">
-        <Form.Control type="date" className="me-2" />
-        <Button variant="secondary" className="me-2">{"<"}</Button>
-        <Form.Control type="text" value="February 21, 2025" readOnly className="me-2" />
+    <div className="d-flex align-items-center mb-3">
+        <Form.Control 
+          type="date" 
+          value={selectedDate} 
+          onChange={handleDateChange} 
+          className="me-2" 
+        />
+        <Button variant="secondary" className="me-2" >{"<"}</Button>
+        <Form.Control 
+          type="text" 
+          value={formatDate(selectedDate)} 
+          readOnly 
+          className="me-2" 
+        />
         <Button variant="secondary">{">"}</Button>
       </div>
 
       <div className="border p-3">
-        <h5 className="text-center">Daily Attendance Sheet - 2025</h5>
+        <h5 className="text-center">Daily Attendance Sheet - {new Date(selectedDate).getFullYear()}</h5>
         <div className="d-flex justify-content-between mt-2">
-          <span>Month: FEBRUARY</span>
-          <span>Date: 2025-02-21</span>
+          <span>Month: {getMonthName(selectedDate)}</span>
+          <span>Date: {selectedDate}</span>
         </div>
       </div>
 
@@ -61,8 +123,8 @@ const AttendanceSheet = () => {
         </thead>
         <tbody>
           {employees.map((employee, index) => (
-            <tr key={employee.id}>
-              <td>{employee.id}</td>
+            <tr key={employee.employeeId}>
+              <td>{employee.employeeId}</td>
               <td>{employee.name}</td>
               <td className="d-flex">
                 <Form.Control type="text" value={employee.startHour} onChange={(e) => handleInputChange(e, index, "startHour")} className="me-1 w-25" />
@@ -72,7 +134,9 @@ const AttendanceSheet = () => {
                   <option>PM</option>
                 </Form.Select>
               </td>
-              <td><Form.Control type="text" className="w-100" /></td>
+              <td>
+                <Form.Control type="text" value={employee.lateEntryReason} onChange={(e) => handleInputChange(e, index, "lateEntryReason")} className="w-100" />
+                </td>
               <td className="d-flex">
                 <Form.Control type="text" value={employee.exitHour} onChange={(e) => handleInputChange(e, index, "exitHour")} className="me-1 w-25" />
                 <Form.Control type="text" value={employee.exitMinute} onChange={(e) => handleInputChange(e, index, "exitMinute")} className="me-1 w-25" />
@@ -98,8 +162,8 @@ const AttendanceSheet = () => {
       </Table>
 
       <div className="text-center mt-3">
-        <Button variant="success">Submit</Button>
-      </div>
+          <Button variant="success" onClick={handleSubmit}>Submit</Button>
+        </div>
     </div>
     </>
   );
