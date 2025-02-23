@@ -9,12 +9,20 @@ const AttendanceSheet = () => {
   const [employees, setEmployees] = useState([ 
   ]);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
-
+  const [dayStatus, setDayStatus] = useState("Office");
   const handleDateChange = (e) => {
     setSelectedDate(e.target.value);
     setEmployees([...employees.map(emp => ({ ...emp, date: e.target.value }))]);
   };
-
+  const handleDayStatusChange = (e) => {
+    const newStatus = e.target.value;
+    setDayStatus(newStatus);
+    
+    setEmployees(prevEmployees => 
+      prevEmployees.map(emp => ({ ...emp, globalDayStatus: newStatus }))
+    );
+  };
+  
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const options = { year: "numeric", month: "long", day: "numeric" };
@@ -42,9 +50,13 @@ const AttendanceSheet = () => {
             exitHour: "5",
             exitMinute: "0",
             exitPeriod: "PM",
+            earlyExitReason:"",
             outHour: "0",
             outMinute: "0",
-            status: "Present",
+            updateStatus: "1",
+            globalDayStatus: dayStatus,
+            status: "Present"
+
           })));
         }
       } catch (error) {
@@ -102,9 +114,9 @@ const AttendanceSheet = () => {
           <option>Present</option>
           <option>Absent</option>
         </Form.Select>
-        <Form.Select>
+        <Form.Select value={dayStatus} onChange={(e) => handleDayStatusChange(e)}>
           <option>Office</option>
-          <option>Remote</option>
+          <option>Holiday</option>
         </Form.Select>
       </div>
 
@@ -145,7 +157,9 @@ const AttendanceSheet = () => {
                   <option>PM</option>
                 </Form.Select>
               </td>
-              <td><Form.Control type="text" className="w-100" /></td>
+              <td>
+              <Form.Control type="text" value={employee.earlyExitReason} onChange={(e) => handleInputChange(e, index, "earlyExitReason")} className="w-100" />
+                </td>
               <td className="d-flex">
                 <Form.Control type="text" value={employee.outHour} onChange={(e) => handleInputChange(e, index, "outHour")} className="me-1 w-50" />
                 <Form.Control type="text" value={employee.outMinute} onChange={(e) => handleInputChange(e, index, "outMinute")} className="w-50" />
@@ -154,6 +168,8 @@ const AttendanceSheet = () => {
                 <Form.Select value={employee.status} onChange={(e) => handleInputChange(e, index, "status")}>
                   <option>Present</option>
                   <option>Absent</option>
+                  <option>Leave</option>
+                  <option>Holiday</option>
                 </Form.Select>
               </td>
             </tr>

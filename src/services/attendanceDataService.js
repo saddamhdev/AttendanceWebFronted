@@ -6,28 +6,9 @@ const saveAttendance = async (attendanceData) => {
   console.log("Sending Attendance Data:", attendanceData); // Debugging
 
   try {
-    await Promise.all(
-      attendanceData.map((data) =>
-        axios.post(API_URL, {
-          employeeId: data.employeeId,
-          name: data.name,
-          month: new Date(data.date).toLocaleString("en-US", { month: "long" }), // Convert to full month name
-          year: new Date(data.date).getFullYear().toString(), // Convert year to string
-          entryTime: formatDateTime(data.date, data.startHour, data.startMinute, data.startPeriod), 
-          lateEntryReason: data.lateEntryReason || "good reason",
-          exitTime: formatDateTime(data.date, data.exitHour, data.exitMinute, data.exitPeriod), 
-          earlyExitReason: data.earlyExitReason || "why",
-          status: data.status,
-          outtime: (data.outHour+"."+data.outMinute), // Convert to 24-hour format
-          entryDate: data.date, // Ensure format is `YYYY-MM-DD`
-          presentTime: formatDateTime(data.date, data.startHour, data.startMinute, data.startPeriod),
-          updateStatus: data.updateStatus || "1",
-          globalDayStatus: data.globalDayStatus || "Present",
-        })
-      )
-    );
+     const response= await  axios.post(API_URL, attendanceData)
 
-    return { message: "Attendance saved successfully" };
+    return response.data;
   } catch (error) {
     console.error("Error saving attendance:", error?.response?.data || error.message);
     return { message: "Failed to save attendance" };

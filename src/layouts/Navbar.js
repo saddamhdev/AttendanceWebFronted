@@ -77,7 +77,7 @@ const Navbar = () => {
           <li className="nav-item dropdown hover-dropdown">
               <a
                 className="nav-link"
-                href="#"
+                href="/GlobalSetting"
               >
                 Setting
               </a>
