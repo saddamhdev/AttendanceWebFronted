@@ -7,6 +7,7 @@ import RegistrationForm from "../pages/RegistrationForm";
 import EmployeeList from "../pages/EmployeeList";
 import AttendenceAdd from "../pages/AttendenceAdd";
 import GlobalSetting from "../pages/GlobalSetting";
+import LocalSetting from "../pages/LocalSetting";
 function App() {
   return (
     <Router>
@@ -18,6 +19,7 @@ function App() {
         <Route path="/EmployeeList" element={<EmployeeList />} />
         <Route path="/AttendenceAdd" element={<AttendenceAdd />} />
         <Route path="/GlobalSetting" element={<GlobalSetting />} />
+        <Route path="/LocalSetting" element={<LocalSetting />} />
       </Routes>
     </Router>
   );
