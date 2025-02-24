@@ -9,6 +9,7 @@ import AttendenceAdd from "../pages/AttendenceAdd";
 import GlobalSetting from "../pages/GlobalSetting";
 import LocalSetting from "../pages/LocalSetting";
 import Position from "../pages/Position";
+import UserAtAGlance from "../pages/UserAtAGlance";
 function App() {
   return (
     <Router>
@@ -22,6 +23,7 @@ function App() {
         <Route path="/GlobalSetting" element={<GlobalSetting />} />
         <Route path="/LocalSetting" element={<LocalSetting />} />
         <Route path="/Position" element={<Position />} />
+        <Route path="/UserAtAGlance" element={<UserAtAGlance />} />
       </Routes>
     </Router>
   );
