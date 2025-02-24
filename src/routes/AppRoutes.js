@@ -8,6 +8,7 @@ import EmployeeList from "../pages/EmployeeList";
 import AttendenceAdd from "../pages/AttendenceAdd";
 import GlobalSetting from "../pages/GlobalSetting";
 import LocalSetting from "../pages/LocalSetting";
+import Position from "../pages/Position";
 function App() {
   return (
     <Router>
@@ -20,6 +21,7 @@ function App() {
         <Route path="/AttendenceAdd" element={<AttendenceAdd />} />
         <Route path="/GlobalSetting" element={<GlobalSetting />} />
         <Route path="/LocalSetting" element={<LocalSetting />} />
+        <Route path="/Position" element={<Position />} />
       </Routes>
     </Router>
   );

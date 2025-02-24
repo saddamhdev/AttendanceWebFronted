@@ -37,7 +37,7 @@ const EmployeeTable = () => {
   const handleAdd = async () => {
     setLoading(true);
     try {
-      await addEmployee(formData, employees.length);
+      await addEmployee(formData, employees.length+1);
       setEmployees([...employees, formData]);
       setFormData({ idNumber: "", name: "", designation: "", joinDate: "" });
     } catch (error) {

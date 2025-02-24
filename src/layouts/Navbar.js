@@ -71,7 +71,7 @@ const Navbar = () => {
                 <li><a className="dropdown-item" href="/EmployeeList">List</a></li>
                 <li><a className="dropdown-item" href="/seo">Archieve</a></li>
                 <li><a className="dropdown-item" href="/marketing">Delete</a></li>
-                <li><a className="dropdown-item" href="/marketing">Position</a></li>
+                <li><a className="dropdown-item" href="/Position">Position</a></li>
               </ul>
             </li>
           <li className="nav-item dropdown hover-dropdown">
