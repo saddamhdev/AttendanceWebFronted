@@ -1,17 +1,47 @@
 import React from "react";
 import { useState,useEffect } from "react";
-import { Container, Row, Col, Card, Button, Form,Table } from "react-bootstrap";
+import { Container, Row, Col, Button, Form,Table } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "../layouts/Navbar";
 import { getAllEmployees } from "../services/employeeService";
-
+import { getAllAtAGlanceData ,exportAtAGlanceData} from "../services/userAtAGlanceService";
 const AttendanceReport = () => {
 
-    const[startDate,setStartDate]=useState("");
-    const[endDate,setEndDate]=useState("");
+     const [startDate, setStartDate] = useState(() => new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split("T")[0]);
+     const [endDate, setEndDate] = useState(() => new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split("T")[0]);
+  
     const[employeeId,setEmployeeId]=useState("");
     const[employeeName,setEmployeeName]=useState("");
     const[employees,setEmployees]=useState([]);
+    const[userAtAGlanceData,setUserAtAGlanceData]=useState(
+      {
+        startDate:" ",
+        endDate:" ",
+        employeeId:" ",
+        employeeName:" ",
+        officeDay:0,
+        totalPresent:0,
+        avgTime:0.0,
+        leave:0,
+        absent:0,
+        holiday:0,
+        shortTime:0,
+        regularTime:0,
+        extraTime:0,
+        entryInTime:0,
+        entryLate:0,
+        totalLate:0,
+        exitOk:0,
+        exitEarly:0,
+        totalExtraTime:0,
+        officeOutTime:0,
+        officeInTime:0,
+        totalTime:0
+
+      }
+    );
+
+
     const fetchEmployees=async()=>{ 
         try{
             const response=await getAllEmployees("1");
@@ -19,10 +49,13 @@ const AttendanceReport = () => {
             setEmployees(response);
             setEmployeeId(response[0].idNumber);
             setEmployeeName(response[0].name);
+
         }catch(error){
             console.error("Error fetching employees:",error);
         }
     }
+
+
     useEffect(()=>{
         fetchEmployees();
     },[]);
@@ -40,8 +73,34 @@ const AttendanceReport = () => {
         const selectedUser=employees.find((us)=>us.name===e.target.value);
         setEmployeeId(selectedUser.idNumber);
 
-
     } 
+
+
+  const fetchUserAtAGlanceData = async () => {
+      try {
+          const response = await getAllAtAGlanceData(employeeId, employeeName, startDate, endDate);
+          console.log("Fetched user at a glance data 11:", response);
+          setUserAtAGlanceData(response);
+      } catch (error) {
+          console.error("Error fetching user at a glance data:", error);
+      }
+  };
+  
+  useEffect(() => {
+      if (employeeId && employeeName && startDate && endDate) {
+          fetchUserAtAGlanceData();
+      }
+  }, [employeeId, employeeName, startDate, endDate]); // Fetch data when any dependency changes
+
+
+  
+    const exportData=async()=>{
+        
+        await exportAtAGlanceData(userAtAGlanceData);
+        alert('Download successfully to Download directory'); // Log the response from the server
+        
+
+    }
     
   return (
     <> 
@@ -50,10 +109,10 @@ const AttendanceReport = () => {
 
       <Row className="mb-3 align-items-center">
         <Col md={3}>
-          <Form.Control type="date" defaultValue="2025-02-01" value={startDate} onChange={(e) => handleStartDateChange( e.target.value)} />
+          <Form.Control type="date"  value={startDate} onChange={(e) => handleStartDateChange( e.target.value)} />
         </Col>
         <Col md={3}>
-          <Form.Control type="date" defaultValue="2025-03-01" value={endDate} onChange={(e)=> handleEndDateChange(e.target.value)} />
+          <Form.Control type="date"  value={endDate} onChange={(e)=> handleEndDateChange(e.target.value)} />
         </Col>
         <Col md={3}>
            <Form.Select value={employeeName} className="me-2" onChange={(e) => handleUserChange(e)}>
@@ -65,21 +124,21 @@ const AttendanceReport = () => {
            </Form.Select>
         </Col>
         <Col md={3}>
-          <Button variant="dark" className="w-100">Export Data</Button>
+          <Button variant="dark" className="w-100" onClick={exportData}>Export Data</Button>
         </Col>
       </Row>
       <Table striped bordered hover>
         <tbody>
           {/* Office Day */}
           <tr className="text-white text-center fw-bold">
-            <td style={{ backgroundColor: '#CCCCCC' }}>Office Day</td>
+            <td  style={{ backgroundColor: '#CCCCCC' }}  >Office Day</td>
             <td style={{ backgroundColor: '#C0E0A0' }}>Total Present</td>
             <td style={{ backgroundColor: '#5080C0' }}>Avg Time</td>
           </tr>
           <tr className="text-center">
-            <td>1</td>
-            <td>1</td>
-            <td>8:0</td>
+            <td >{userAtAGlanceData.officeDay}</td>
+            <td >{userAtAGlanceData.totalPresent}</td>
+            <td >{userAtAGlanceData.avgTime}</td>
           </tr>
 
           <tr className="text-white text-center fw-bold">
@@ -93,9 +152,9 @@ const AttendanceReport = () => {
             <td style={{ backgroundColor: '#333333' }}>Holiday</td>
           </tr>
           <tr className="text-center">
-            <td>0</td>
-            <td>0</td>
-            <td>0</td>
+            <td  > {userAtAGlanceData.leave}</td>
+            <td >{userAtAGlanceData.absent}</td>
+            <td >{userAtAGlanceData.holiday}</td>
           </tr>
 
           <tr className="text-white text-center fw-bold">
@@ -109,9 +168,9 @@ const AttendanceReport = () => {
             <td style={{ backgroundColor: '#226622' }}>Extra Time</td>
           </tr>
           <tr className="text-center">
-            <td>1</td>
-            <td>1</td>
-            <td>0</td>
+            <td >{userAtAGlanceData.shortTime}</td>
+            <td >{userAtAGlanceData.regularTime}</td>
+            <td >{userAtAGlanceData.extraTime}</td>
           </tr>
 
           <tr className="text-white text-center fw-bold">
@@ -128,9 +187,9 @@ const AttendanceReport = () => {
             <td style={{ backgroundColor: '#B22222' }}>Total Late</td>
           </tr>
           <tr className="text-center">
-            <td>00</td>
-            <td>0:0</td>
-            <td>0:0</td>
+            <td >{userAtAGlanceData.entryInTime}</td>
+            <td >{userAtAGlanceData.entryLate}</td>
+            <td >{userAtAGlanceData.totalLate}</td>
           </tr>
 
           <tr className="text-white text-center fw-bold">
@@ -145,11 +204,11 @@ const AttendanceReport = () => {
           <tr className="text-center">
             <td style={{ backgroundColor: '#C0E0A0' }}>Ok</td>
             <td style={{ backgroundColor: '#F2B6B6' }}>Early</td>
-            <td rowSpan={2} className="align-middle">00</td>
+            <td rowSpan={2} className="align-middle" >{userAtAGlanceData.totalExtraTime}</td>
           </tr>
           <tr className="text-center">
-            <td>00</td>
-            <td>0:0</td>
+            <td >{userAtAGlanceData.exitOk}</td>
+            <td >{userAtAGlanceData.exitEarly}</td>
           </tr>
 
           <tr className="text-white text-center fw-bold">
@@ -163,9 +222,9 @@ const AttendanceReport = () => {
             <td style={{ backgroundColor: '#226622' }}>Total Time</td>
           </tr>
           <tr className="text-center">
-            <td>8</td>
-            <td>8:0</td>
-            <td>8:0</td>
+            <td >{userAtAGlanceData.officeOutTime}</td>
+            <td >{userAtAGlanceData.officeInTime}</td>
+            <td >{userAtAGlanceData.totalTime}</td>
           </tr>
         </tbody>
       </Table>
