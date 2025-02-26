@@ -2,7 +2,7 @@ import axios from "axios";
 
 const API_URL = "http://localhost:8080/api/user/insert"; // Your backend API URL
 const GET_API_URL = "http://localhost:8080/api/user/getAll"; // Assuming your API has a GET endpoint for all employees
-
+const Delete_API_URL = "http://localhost:8080/api/user/delete";
 const addEmployee = async (employeeData, size) => {
   try {
     const updatedEmployeeData = {
@@ -32,4 +32,22 @@ const getAllEmployees = async (status) => {
   }
 };
 
-export { addEmployee, getAllEmployees };
+const deleteEmployee = async (id, endDate) => {
+  try {
+      const response = await axios.post(Delete_API_URL, { 
+        id, endDate  // ✅ Correct way to send data in the request body
+      }, {
+          headers: {
+              'Content-Type': 'application/json',
+          }
+      });
+      console.log('Response:', response);
+      return response.data;
+  } catch (error) {
+      console.error('Error deleting employee:', error);
+      throw error;
+  }
+};
+
+
+export { addEmployee, getAllEmployees,deleteEmployee };
