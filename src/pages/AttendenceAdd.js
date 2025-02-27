@@ -77,7 +77,13 @@ const AttendanceSheet = () => {
     const response = await saveAttendance(employees);
     alert(response.message);
   };
-
+  const handleStatusChange = (e) => {
+    const newStatus = e.target.value;
+    setEmployees((prevEmployees) =>
+      prevEmployees.map((emp) => ({ ...emp, status: newStatus }))
+    );
+  };
+  
   return (
     <>
     
@@ -110,10 +116,13 @@ const AttendanceSheet = () => {
       </div>
 
       <div className="d-flex my-3">
-        <Form.Select className="me-2">
-          <option>Present</option>
-          <option>Absent</option>
-        </Form.Select>
+      <Form.Select className="me-2" onChange={handleStatusChange}>
+        <option>Present</option>
+        <option>Absent</option>
+        <option>Leave</option>
+        <option>Holiday</option>
+      </Form.Select>
+
         <Form.Select value={dayStatus} onChange={(e) => handleDayStatusChange(e)}>
           <option>Office</option>
           <option>Holiday</option>

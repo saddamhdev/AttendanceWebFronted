@@ -11,6 +11,7 @@ import LocalSetting from "../pages/LocalSetting";
 import Position from "../pages/Position";
 import UserAtAGlance from "../pages/UserAtAGlance";
 import DownloadAllEmployeeAttendanceData from "../pages/DownloadAllEmployeeAttendanceData";
+import UpdateAttendenceAdd from "../pages/UpdateAttendenceAdd";
 function App() {
   return (
     <Router>
@@ -26,6 +27,7 @@ function App() {
         <Route path="/Position" element={<Position />} />
         <Route path="/UserAtAGlance" element={<UserAtAGlance />} />
         <Route path="/DownloadAllEmployeeAttendanceData" element={<DownloadAllEmployeeAttendanceData />} />
+        <Route path="/UpdateAttendenceAdd" element={<UpdateAttendenceAdd />} />
       </Routes>
     </Router>
   );

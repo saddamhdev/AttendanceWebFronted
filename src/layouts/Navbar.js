@@ -36,7 +36,7 @@ const Navbar = () => {
               {/* Sub-navbar for hover */}
               <ul className="dropdown-menu">
                 <li><a className="dropdown-item" href="/AttendenceAdd">Add</a></li>
-                <li><a className="dropdown-item" href="/seo">Update</a></li>
+                <li><a className="dropdown-item" href="/UpdateAttendenceAdd">Update</a></li>
               </ul>
             </li>
             <li className="nav-item dropdown hover-dropdown">

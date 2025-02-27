@@ -1,9 +1,9 @@
 import axios from "axios";
 
 const API_URL = "http://localhost:8181/api/attendance/insert"; // Your backend API URL
-const GetAllAttendanceData_URL = "http://localhost:8181/api/attendance/getAllAttendanceData"; // Assuming your API has a GET endpoint for all employees
 const exportAllAttendanceData_URL = "http://localhost:8181/api/attendance/exportAllAttendanceData"; // Assuming your API has a GET endpoint for all employees
-
+const GetAllAttendanceData_URL = "http://localhost:8181/api/attendance/getAllAttendanceData"; // Assuming your API has a GET endpoint for all employees
+const GetAllAttendanceDataForFixedDay_URL = "http://localhost:8181/api/attendance/getAllAttendanceDataForFixedDay"; // Assuming your API has a GET endpoint for all employees
 const saveAttendance = async (attendanceData) => {
   console.log("Sending Attendance Data:", attendanceData); // Debugging
 
@@ -49,6 +49,23 @@ const getAttendanceData = async (startDate, endDate) => {
   }
 };
 
+const getAttendanceDataForFixDay = async (selectedDate) => {
+  try {
+      const response = await axios.post(GetAllAttendanceDataForFixedDay_URL, { 
+        selectedDate  // ✅ Correct way to send data in the request body
+      }, {
+          headers: {
+              'Content-Type': 'application/json',
+          }
+      });
+     // console.log('Response:', response);
+      return response.data;
+  } catch (error) {
+      console.error('Error deleting employee:', error);
+      throw error;
+  }
+};
+
 const exportDownloadAllAttendanceData = async (attendanceData) => {
   try {
       const response = await axios.post(exportAllAttendanceData_URL, attendanceData, { 
@@ -66,4 +83,4 @@ const exportDownloadAllAttendanceData = async (attendanceData) => {
 
 
 
-export { saveAttendance ,getAttendanceData,exportDownloadAllAttendanceData };
+export { saveAttendance ,getAttendanceData,exportDownloadAllAttendanceData ,getAttendanceDataForFixDay}; 
