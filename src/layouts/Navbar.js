@@ -70,7 +70,7 @@ const Navbar = () => {
               <ul className="dropdown-menu">
                 <li><a className="dropdown-item" href="/EmployeeList">List</a></li>
                 <li><a className="dropdown-item" href="/seo">Archieve</a></li>
-                <li><a className="dropdown-item" href="/marketing">Delete</a></li>
+                
                 <li><a className="dropdown-item" href="/Position">Position</a></li>
               </ul>
             </li>
@@ -85,7 +85,7 @@ const Navbar = () => {
             <li className="nav-item dropdown hover-dropdown">
               <a
                 className="nav-link"
-                href="/services"
+                href="/DownloadAllEmployeeAttendanceData"
               >
                 Download
               </a>

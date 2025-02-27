@@ -41,3 +41,10 @@
     width: auto;
   }
   
+  .table-responsive {
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  th, td {
+    text-align: center;
+  }

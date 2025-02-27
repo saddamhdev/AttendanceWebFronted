@@ -1,133 +1,137 @@
-import React from "react";
-import { useState,useEffect } from "react";
-import { Container, Row, Col, Button, Form,Table } from "react-bootstrap";
+import React, { useState, useEffect } from "react";
+import { Container, Row, Col, Button, Form, Table, Modal, Spinner } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "../layouts/Navbar";
 import { getAllEmployees } from "../services/employeeService";
-import { getAllAtAGlanceData ,exportAtAGlanceData} from "../services/userAtAGlanceService";
+import { getAllAtAGlanceData, exportAtAGlanceData } from "../services/userAtAGlanceService";
+
 const AttendanceReport = () => {
-
-     const [startDate, setStartDate] = useState(() => new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split("T")[0]);
-     const [endDate, setEndDate] = useState(() => new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split("T")[0]);
+  const [startDate, setStartDate] = useState(() =>
+    new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString().split("T")[0]
+  );
+  const [endDate, setEndDate] = useState(() =>
+    new Date(new Date().setDate(new Date().getDate() - 1)).toISOString().split("T")[0]
+  );
   
-    const[employeeId,setEmployeeId]=useState("");
-    const[employeeName,setEmployeeName]=useState("");
-    const[employees,setEmployees]=useState([]);
-    const[userAtAGlanceData,setUserAtAGlanceData]=useState(
-      {
-        startDate:" ",
-        endDate:" ",
-        employeeId:" ",
-        employeeName:" ",
-        officeDay:0,
-        totalPresent:0,
-        avgTime:0.0,
-        leave:0,
-        absent:0,
-        holiday:0,
-        shortTime:0,
-        regularTime:0,
-        extraTime:0,
-        entryInTime:0,
-        entryLate:0,
-        totalLate:0,
-        exitOk:0,
-        exitEarly:0,
-        totalExtraTime:0,
-        officeOutTime:0,
-        officeInTime:0,
-        totalTime:0
+  const [employeeId, setEmployeeId] = useState("");
+  const [employeeName, setEmployeeName] = useState("");
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(false); // Loading state
 
-      }
-    );
+  const [userAtAGlanceData, setUserAtAGlanceData] = useState({
+    startDate: "",
+    endDate: "",
+    employeeId: "",
+    employeeName: "",
+    officeDay: 0,
+    totalPresent: 0,
+    avgTime: 0.0,
+    leave: 0,
+    absent: 0,
+    holiday: 0,
+    shortTime: 0,
+    regularTime: 0,
+    extraTime: 0,
+    entryInTime: 0,
+    entryLate: 0,
+    totalLate: 0,
+    exitOk: 0,
+    exitEarly: 0,
+    totalExtraTime: 0,
+    officeOutTime: 0,
+    officeInTime: 0,
+    totalTime: 0,
+  });
 
-
-    const fetchEmployees=async()=>{ 
-        try{
-            const response=await getAllEmployees("1");
-            console.log("Fetched employees:",response);
-            setEmployees(response);
-            setEmployeeId(response[0].idNumber);
-            setEmployeeName(response[0].name);
-
-        }catch(error){
-            console.error("Error fetching employees:",error);
-        }
+  const fetchEmployees = async () => {
+    setLoading(true);
+    try {
+      const response = await getAllEmployees("1");
+      console.log("Fetched employees:", response);
+      setEmployees(response);
+      setEmployeeId(response[0].idNumber);
+      setEmployeeName(response[0].name);
+    } catch (error) {
+      console.error("Error fetching employees:", error);
     }
+    setLoading(false);
+  };
 
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
 
-    useEffect(()=>{
-        fetchEmployees();
-    },[]);
+  const handleStartDateChange = (value) => setStartDate(value);
+  const handleEndDateChange = (value) => setEndDate(value);
 
-    const  handleStartDateChange=(value)=>{
-        setStartDate(value);
-
-    }
-    const handleEndDateChange=(value)=>{
-        setEndDate(value); 
-             
-    } 
-    const handleUserChange=(e)=>{
-        setEmployeeName(e.target.value);
-        const selectedUser=employees.find((us)=>us.name===e.target.value);
-        setEmployeeId(selectedUser.idNumber);
-
-    } 
-
+  const handleUserChange = (e) => {
+    setEmployeeName(e.target.value);
+    const selectedUser = employees.find((us) => us.name === e.target.value);
+    setEmployeeId(selectedUser.idNumber);
+  };
 
   const fetchUserAtAGlanceData = async () => {
-      try {
-          const response = await getAllAtAGlanceData(employeeId, employeeName, startDate, endDate);
-          console.log("Fetched user at a glance data 11:", response);
-          setUserAtAGlanceData(response);
-      } catch (error) {
-          console.error("Error fetching user at a glance data:", error);
-      }
-  };
-  
-  useEffect(() => {
-      if (employeeId && employeeName && startDate && endDate) {
-          fetchUserAtAGlanceData();
-      }
-  }, [employeeId, employeeName, startDate, endDate]); // Fetch data when any dependency changes
-
-
-  
-    const exportData=async()=>{
-        
-        await exportAtAGlanceData(userAtAGlanceData);
-        alert('Download successfully to Download directory'); // Log the response from the server
-        
-
+    setLoading(true);
+    try {
+      const response = await getAllAtAGlanceData(employeeId, employeeName, startDate, endDate);
+      console.log("Fetched user at a glance data:", response);
+      setUserAtAGlanceData(response);
+    } catch (error) {
+      console.error("Error fetching user at a glance data:", error);
     }
-    
-  return (
-    <> 
-    <Navbar />
-    <Container className="mt-4" style={{ paddingTop: '100px' }}>
+    setLoading(false);
+  };
 
-      <Row className="mb-3 align-items-center">
-        <Col md={3}>
-          <Form.Control type="date"  value={startDate} onChange={(e) => handleStartDateChange( e.target.value)} />
-        </Col>
-        <Col md={3}>
-          <Form.Control type="date"  value={endDate} onChange={(e)=> handleEndDateChange(e.target.value)} />
-        </Col>
-        <Col md={3}>
-           <Form.Select value={employeeName} className="me-2" onChange={(e) => handleUserChange(e)}>
-            {
-                employees.map((us, index) => (
+  useEffect(() => {
+    if (employeeId && employeeName && startDate && endDate) {
+      fetchUserAtAGlanceData();
+    }
+  }, [employeeId, employeeName, startDate, endDate]);
+
+  const exportData = async () => {
+    setLoading(true);
+    await exportAtAGlanceData(userAtAGlanceData);
+    setLoading(false);
+    alert("Download successfully to Download directory");
+  };
+
+  return (
+    <>
+      <Navbar />
+      <Container className="mt-4" style={{ paddingTop: "100px" }}>
+        <Row className="mb-3 align-items-center">
+          <Col md={3}>
+            <Form.Control type="date" value={startDate} onChange={(e) => handleStartDateChange(e.target.value)} />
+          </Col>
+          <Col md={3}>
+            <Form.Control type="date" value={endDate} onChange={(e) => handleEndDateChange(e.target.value)} />
+          </Col>
+          <Col md={3}>
+            <Form.Select value={employeeName} className="me-2" onChange={handleUserChange}>
+              {employees.map((us, index) => (
                 <option key={index}>{us.name}</option>
-                ))
-            }
-           </Form.Select>
-        </Col>
-        <Col md={3}>
-          <Button variant="dark" className="w-100" onClick={exportData}>Export Data</Button>
-        </Col>
-      </Row>
-      <Table striped bordered hover>
+              ))}
+            </Form.Select>
+          </Col>
+          <Col md={3}>
+            <Button variant="dark" className="w-100" onClick={exportData}>
+              Export Data
+            </Button>
+          </Col>
+        </Row>
+
+        {/* Loading Popup */}
+        <Modal show={loading} centered>
+          <Modal.Body className="text-center">
+            <Spinner animation="border" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </Spinner>
+            <p className="mt-2">Fetching data, please wait...</p>
+          </Modal.Body>
+        </Modal>
+
+        {/* Data Table */}
+        <Table striped bordered hover>
         <tbody>
           {/* Office Day */}
           <tr className="text-white text-center fw-bold">
@@ -228,7 +232,7 @@ const AttendanceReport = () => {
           </tr>
         </tbody>
       </Table>
-    </Container>
+      </Container>
     </>
   );
 };

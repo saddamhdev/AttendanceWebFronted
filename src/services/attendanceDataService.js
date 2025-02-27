@@ -1,6 +1,8 @@
 import axios from "axios";
 
 const API_URL = "http://localhost:8181/api/attendance/insert"; // Your backend API URL
+const GetAllAttendanceData_URL = "http://localhost:8181/api/attendance/getAllAttendanceData"; // Assuming your API has a GET endpoint for all employees
+const exportAllAttendanceData_URL = "http://localhost:8181/api/attendance/exportAllAttendanceData"; // Assuming your API has a GET endpoint for all employees
 
 const saveAttendance = async (attendanceData) => {
   console.log("Sending Attendance Data:", attendanceData); // Debugging
@@ -30,4 +32,38 @@ const formatTime = (hour, minute, period) => {
   return `${h.toString().padStart(2, "0")}:${minute.toString().padStart(2, "0")}:00`;
 };
 
-export { saveAttendance };
+const getAttendanceData = async (startDate, endDate) => {
+  try {
+      const response = await axios.post(GetAllAttendanceData_URL, { 
+        startDate, endDate  // ✅ Correct way to send data in the request body
+      }, {
+          headers: {
+              'Content-Type': 'application/json',
+          }
+      });
+     // console.log('Response:', response);
+      return response.data;
+  } catch (error) {
+      console.error('Error deleting employee:', error);
+      throw error;
+  }
+};
+
+const exportDownloadAllAttendanceData = async (attendanceData) => {
+  try {
+      const response = await axios.post(exportAllAttendanceData_URL, attendanceData, { 
+          headers: {
+              'Content-Type': 'application/json',
+          }
+      });
+      console.log('Response:', response.data);
+      return response.data;
+  } catch (error) {
+      console.error('Error exporting attendance data:', error.response ? error.response.data : error.message);
+      throw error;
+  }
+};
+
+
+
+export { saveAttendance ,getAttendanceData,exportDownloadAllAttendanceData };

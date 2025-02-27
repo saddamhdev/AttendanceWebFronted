@@ -10,6 +10,7 @@ import GlobalSetting from "../pages/GlobalSetting";
 import LocalSetting from "../pages/LocalSetting";
 import Position from "../pages/Position";
 import UserAtAGlance from "../pages/UserAtAGlance";
+import DownloadAllEmployeeAttendanceData from "../pages/DownloadAllEmployeeAttendanceData";
 function App() {
   return (
     <Router>
@@ -24,6 +25,7 @@ function App() {
         <Route path="/LocalSetting" element={<LocalSetting />} />
         <Route path="/Position" element={<Position />} />
         <Route path="/UserAtAGlance" element={<UserAtAGlance />} />
+        <Route path="/DownloadAllEmployeeAttendanceData" element={<DownloadAllEmployeeAttendanceData />} />
       </Routes>
     </Router>
   );
