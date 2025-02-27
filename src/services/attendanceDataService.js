@@ -4,6 +4,9 @@ const API_URL = "http://localhost:8181/api/attendance/insert"; // Your backend A
 const exportAllAttendanceData_URL = "http://localhost:8181/api/attendance/exportAllAttendanceData"; // Assuming your API has a GET endpoint for all employees
 const GetAllAttendanceData_URL = "http://localhost:8181/api/attendance/getAllAttendanceData"; // Assuming your API has a GET endpoint for all employees
 const GetAllAttendanceDataForFixedDay_URL = "http://localhost:8181/api/attendance/getAllAttendanceDataForFixedDay"; // Assuming your API has a GET endpoint for all employees
+const updateAttendanceData_URL = "http://localhost:8181/api/attendance/updateAttendanceData"; // Assuming your API has a GET endpoint for all employees
+const GetAttendanceDataForAnyPeriod_URL = "http://localhost:8181/api/attendance/getAttendanceDataForAnyPeriod"; // Assuming your API has a GET endpoint for all employees
+const exportSummaryAttendanceData_URL = "http://localhost:8181/api/attendance/exportSummaryAttendanceData"; // Assuming your API has a GET endpoint for all employees
 const saveAttendance = async (attendanceData) => {
   console.log("Sending Attendance Data:", attendanceData); // Debugging
 
@@ -49,6 +52,41 @@ const getAttendanceData = async (startDate, endDate) => {
   }
 };
 
+const getAttendanceDataForAnyPeriod = async (employeeId,employeeName,startDate, endDate) => {
+  try {
+      const response = await axios.post(GetAttendanceDataForAnyPeriod_URL, { 
+        employeeId,employeeName,startDate, endDate  // ✅ Correct way to send data in the request body
+      }, {
+          headers: {
+              'Content-Type': 'application/json',
+          }
+      });
+     // console.log('Response:', response);
+      return response.data;
+  } catch (error) {
+      console.error('Error deleting employee:', error);
+      throw error;
+  }
+};
+
+const updateAttendance = async (newData, oldData) => {
+  try {
+    const response = await axios.post(updateAttendanceData_URL, JSON.stringify({
+      newData: newData,  // ✅ Ensure keys match backend expectation
+      oldData: oldData
+    }), {
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating attendance:', error);
+    throw error;
+  }
+};
+
+
 const getAttendanceDataForFixDay = async (selectedDate) => {
   try {
       const response = await axios.post(GetAllAttendanceDataForFixedDay_URL, { 
@@ -80,7 +118,20 @@ const exportDownloadAllAttendanceData = async (attendanceData) => {
       throw error;
   }
 };
+const exportSummaryAttendanceData = async (attendanceData) => {
+  try {
+      const response = await axios.post(exportSummaryAttendanceData_URL, attendanceData, { 
+          headers: {
+              'Content-Type': 'application/json',
+          }
+      });
+      console.log('Response:', response.data);
+      return response.data;
+  } catch (error) {
+      console.error('Error exporting attendance data:', error.response ? error.response.data : error.message);
+      throw error;
+  }
+};
 
 
-
-export { saveAttendance ,getAttendanceData,exportDownloadAllAttendanceData ,getAttendanceDataForFixDay}; 
+export { saveAttendance ,getAttendanceData,exportDownloadAllAttendanceData ,getAttendanceDataForFixDay,updateAttendance,getAttendanceDataForAnyPeriod,exportSummaryAttendanceData}; 

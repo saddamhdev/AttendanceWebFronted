@@ -49,7 +49,7 @@ const Navbar = () => {
 
               {/* Sub-navbar for hover */}
               <ul className="dropdown-menu">
-                <li><a className="dropdown-item" href="/web-design">Summary</a></li>
+                <li><a className="dropdown-item" href="/Summary">Summary</a></li>
                 <li><a className="dropdown-item" href="/UserAtAGlance">At a Glance</a></li>
                 <li><a className="dropdown-item" href="/LocalSetting">Setting</a></li>
                 <li><a className="dropdown-item" href="/marketing">Asset</a></li>

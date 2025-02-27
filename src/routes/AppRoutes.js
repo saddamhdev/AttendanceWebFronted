@@ -12,6 +12,7 @@ import Position from "../pages/Position";
 import UserAtAGlance from "../pages/UserAtAGlance";
 import DownloadAllEmployeeAttendanceData from "../pages/DownloadAllEmployeeAttendanceData";
 import UpdateAttendenceAdd from "../pages/UpdateAttendenceAdd";
+import Summary from "../pages/Summary";
 function App() {
   return (
     <Router>
@@ -28,6 +29,7 @@ function App() {
         <Route path="/UserAtAGlance" element={<UserAtAGlance />} />
         <Route path="/DownloadAllEmployeeAttendanceData" element={<DownloadAllEmployeeAttendanceData />} />
         <Route path="/UpdateAttendenceAdd" element={<UpdateAttendenceAdd />} />
+        <Route path="/Summary" element={<Summary />} />
       </Routes>
     </Router>
   );

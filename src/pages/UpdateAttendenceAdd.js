@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { Table, Form, Button, Spinner, Modal } from "react-bootstrap";
 import Navbar from "../layouts/Navbar";
-import { getAttendanceDataForFixDay, saveAttendance } from "../services/attendanceDataService";
+import { getAttendanceDataForFixDay, saveAttendance,updateAttendance } from "../services/attendanceDataService";
 
 const AttendanceSheet = () => {
   const [employees, setEmployees] = useState([]);
   const [selectedDate, setSelectedDate] = useState("");
   const [dayStatus, setDayStatus] = useState("Office");
   const [loading, setLoading] = useState(false);
+  const [oldData, setOldData] = useState([]);
 
   useEffect(() => {
     if (selectedDate) {
@@ -19,11 +20,14 @@ const AttendanceSheet = () => {
     setLoading(true);
     try {
       const response = await getAttendanceDataForFixDay(selectedDate);
+     
       console.log("Fetched employees:", response);
       setEmployees(Array.isArray(response) && response.length > 0 ? response : []);
+      setOldData(JSON.parse(JSON.stringify(Array.isArray(response) && response.length > 0 ? response : [])));  // Deep copy
     } catch (error) {
       console.error("Error fetching employees:", error);
       setEmployees([]);
+      setOldData([]);
     } finally {
       setLoading(false);
     }
@@ -55,8 +59,10 @@ const AttendanceSheet = () => {
 
   const handleUpdate = async () => {
     try {
-      const response = await saveAttendance(employees);
-      alert(response.message);
+      const response = await updateAttendance(employees, oldData);
+      alert(response);
+      fetchEmployees();
+      
     } catch (error) {
       console.error("Error updating attendance:", error);
     }
