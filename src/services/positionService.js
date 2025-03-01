@@ -25,7 +25,7 @@ const addPositionSettingData = async (PositionSettingData) => {
         status: "1", // Default status, change if needed
      
     };
-    console.log(updatedPositionSettingData);
+  
     const response = await axios.post(API_URL, updatedPositionSettingData);
     return response.data;
   } catch (error) {
@@ -59,7 +59,7 @@ const getAllPositionData = async (status) => {
   };
 
   const updatePositionData = async (row) => {
-    console.log("row", row);
+  
     try {
         // Send the data in the request body
         const response = await axios.post(Update_API_URL, row, {
@@ -67,10 +67,10 @@ const getAllPositionData = async (status) => {
                 'Content-Type': 'application/json', // Ensure it's set to JSON
             }
         });
-        console.log('Response:', response); // Log the response from the server
+     
         return response.data; // Return the response data from the API
     } catch (error) {
-        console.error('Error updating position data:', error); // Log any errors
+     
         throw error; // Rethrow the error if needed
     }
 };

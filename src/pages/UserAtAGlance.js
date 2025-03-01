@@ -47,7 +47,7 @@ const AttendanceReport = () => {
     setLoading(true);
     try {
       const response = await getAllEmployees("1");
-      console.log("Fetched employees:", response);
+     
       setEmployees(response);
       setEmployeeId(response[0].idNumber);
       setEmployeeName(response[0].name);
@@ -74,7 +74,7 @@ const AttendanceReport = () => {
     setLoading(true);
     try {
       const response = await getAllAtAGlanceData(employeeId, employeeName, startDate, endDate);
-      console.log("Fetched user at a glance data:", response);
+     
       setUserAtAGlanceData(response);
     } catch (error) {
       console.error("Error fetching user at a glance data:", error);

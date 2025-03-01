@@ -25,7 +25,7 @@ const addLocalSettingData = async (LocalSettingData) => {
         status: "1", // Default status, change if needed
      
     };
-    console.log(updatedLocalSettingData);
+    
     const response = await axios.post(API_URL, updatedLocalSettingData);
     return response.data;
   } catch (error) {

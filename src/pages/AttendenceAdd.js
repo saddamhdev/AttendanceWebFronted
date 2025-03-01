@@ -37,7 +37,7 @@ const AttendanceSheet = () => {
     const fetchEmployees = async () => {
       try {
         const response = await getAllEmployees("1");
-        console.log("Fetched employees:", response);
+      
         if (Array.isArray(response)) {
           setEmployees(response.map(emp => ({
             date: selectedDate,

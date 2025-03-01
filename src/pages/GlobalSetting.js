@@ -16,7 +16,7 @@ const DataTable = () => {
   const fetchGlobalData = async () => {
     try {
       const response = await getAllGlobalData();
-     // console.log("Fetched global data:", response);
+    
       setRows(response);
     } catch (error) {
       console.error("Error fetching global data:", error);

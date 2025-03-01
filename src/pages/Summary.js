@@ -25,7 +25,7 @@ const AttendanceSheet = () => {
       try {
         const response = await getAttendanceDataForAnyPeriod(employeeId, employeeName, startDate, endDate);
         if (requestId === latestRequestRef.current) {
-          console.log("Latest Data Fetched:", response);
+         
           setEmployees(Array.isArray(response) ? response : []);
         }
       } catch (error) {

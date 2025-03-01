@@ -8,14 +8,14 @@ const updateAttendanceData_URL = "http://localhost:8181/api/attendance/updateAtt
 const GetAttendanceDataForAnyPeriod_URL = "http://localhost:8181/api/attendance/getAttendanceDataForAnyPeriod"; // Assuming your API has a GET endpoint for all employees
 const exportSummaryAttendanceData_URL = "http://localhost:8181/api/attendance/exportSummaryAttendanceData"; // Assuming your API has a GET endpoint for all employees
 const saveAttendance = async (attendanceData) => {
-  console.log("Sending Attendance Data:", attendanceData); // Debugging
+  
 
   try {
      const response= await  axios.post(API_URL, attendanceData)
 
     return response.data;
   } catch (error) {
-    console.error("Error saving attendance:", error?.response?.data || error.message);
+   
     return { message: "Failed to save attendance" };
   }
 };
@@ -44,10 +44,10 @@ const getAttendanceData = async (startDate, endDate) => {
               'Content-Type': 'application/json',
           }
       });
-     // console.log('Response:', response);
+   
       return response.data;
   } catch (error) {
-      console.error('Error deleting employee:', error);
+    
       throw error;
   }
 };
@@ -61,10 +61,10 @@ const getAttendanceDataForAnyPeriod = async (employeeId,employeeName,startDate, 
               'Content-Type': 'application/json',
           }
       });
-     // console.log('Response:', response);
+   
       return response.data;
   } catch (error) {
-      console.error('Error deleting employee:', error);
+     
       throw error;
   }
 };
@@ -81,7 +81,7 @@ const updateAttendance = async (newData, oldData) => {
     });
     return response.data;
   } catch (error) {
-    console.error('Error updating attendance:', error);
+  
     throw error;
   }
 };
@@ -96,10 +96,10 @@ const getAttendanceDataForFixDay = async (selectedDate) => {
               'Content-Type': 'application/json',
           }
       });
-     // console.log('Response:', response);
+    
       return response.data;
   } catch (error) {
-      console.error('Error deleting employee:', error);
+    
       throw error;
   }
 };
@@ -111,10 +111,10 @@ const exportDownloadAllAttendanceData = async (attendanceData) => {
               'Content-Type': 'application/json',
           }
       });
-      console.log('Response:', response.data);
+    
       return response.data;
   } catch (error) {
-      console.error('Error exporting attendance data:', error.response ? error.response.data : error.message);
+     
       throw error;
   }
 };
@@ -125,10 +125,10 @@ const exportSummaryAttendanceData = async (attendanceData) => {
               'Content-Type': 'application/json',
           }
       });
-      console.log('Response:', response.data);
+    
       return response.data;
   } catch (error) {
-      console.error('Error exporting attendance data:', error.response ? error.response.data : error.message);
+     
       throw error;
   }
 };

@@ -32,12 +32,12 @@ const DataTable = () => {
   const fetchLocalData = async () => {
     try {
       const response = await getAllLocalData();
-     // console.log("Fetched global data:", response);
+     
 
       setRows(response);
 
     const  response1 = await getAllEmployees("1");
-      //console.log("Fetched employees:", response);
+      
       setUser(response1);
       setSelectedId(response1[0].idNumber);
       setSelectedParson(response1[0].name);

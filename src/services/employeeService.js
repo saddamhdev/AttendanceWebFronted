@@ -1,53 +1,75 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/user/insert"; // Your backend API URL
-const GET_API_URL = "http://localhost:8080/api/user/getAll"; // Assuming your API has a GET endpoint for all employees
+const API_URL = "http://localhost:8080/api/user/insert"; 
+const GET_API_URL = "http://localhost:8080/api/user/getAll";
 const Delete_API_URL = "http://localhost:8080/api/user/delete";
+
+// Fetch the token from the backend
+const fetchToken = async () => {
+  const response = await axios.get("http://localhost:8181/api/auth/token");
+  return response.data;
+};
+
+// Store the token in localStorage
+const getToken = async () => {
+  let token = localStorage.getItem("authToken");
+  if (!token) {
+    token = await fetchToken();
+    localStorage.setItem("authToken", token);
+  }
+  return token;
+};
+
+// Function to add an employee
 const addEmployee = async (employeeData, size) => {
   try {
     const updatedEmployeeData = {
       ...employeeData,
-      status: "1", // Default status, change if needed
-      endDate: "", // Empty string if no end date is provided
-      position: size, // Assuming position is the same as designation
-      currentTimee: new Date().toISOString(), // Current timestamp in ISO format
+      status: "1", 
+      endDate: "",
+      position: size,
+      currentTimee: new Date().toISOString(),
     };
 
-    const response = await axios.post(API_URL, updatedEmployeeData);
-    return response.data;
+    const token = await getToken();  // ✅ Fix: Await getToken()
+
+    const response = await axios.post(API_URL, updatedEmployeeData, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    return response;
   } catch (error) {
+    console.error("Error adding employee:", error);
     throw error;
   }
 };
 
-// Function to retrieve all employees with a status filter
+// Function to retrieve all employees
 const getAllEmployees = async (status) => {
   try {
+    const token = await getToken(); // ✅ Fix: Await getToken()
     const response = await axios.get(GET_API_URL, {
-      params: { status }, // Send the status as a query parameter
+      headers: { "Authorization": `Bearer ${token}` },
+      params: { status },
     });
     return response.data;
   } catch (error) {
+    console.error("Error fetching employees:", error);
     throw error;
   }
 };
 
+// Function to delete an employee
 const deleteEmployee = async (id, endDate) => {
   try {
-      const response = await axios.post(Delete_API_URL, { 
-        id, endDate  // ✅ Correct way to send data in the request body
-      }, {
-          headers: {
-              'Content-Type': 'application/json',
-          }
-      });
-      console.log('Response:', response);
-      return response.data;
+    const token = await getToken(); // ✅ Fix: Await getToken()
+    const response = await axios.post(Delete_API_URL, { id, endDate }, {
+      headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
+    });
+    return response.data;
   } catch (error) {
-      console.error('Error deleting employee:', error);
-      throw error;
+    console.error("Error deleting employee:", error);
+    throw error;
   }
 };
 
-
-export { addEmployee, getAllEmployees,deleteEmployee };
+export { addEmployee, getAllEmployees, deleteEmployee };

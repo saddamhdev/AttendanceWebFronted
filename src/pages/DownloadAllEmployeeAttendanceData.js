@@ -5,8 +5,8 @@ import { getAttendanceData,exportDownloadAllAttendanceData } from "../services/a
 
 const AttendanceSheet = () => {
   const [employees, setEmployees] = useState([]);
-  const [startDate, setStartDate] = useState();
-  const [endDate, setEndDate] = useState();
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(false); // Loading state
   const latestRequestRef = useRef(0);
 
@@ -23,7 +23,7 @@ const AttendanceSheet = () => {
       try {
         const response = await getAttendanceData(startDate, endDate);
         if (requestId === latestRequestRef.current) {
-          console.log("Latest Data Fetched:", response);
+        
           setEmployees(Array.isArray(response) ? response : []);
         }
       } catch (error) {

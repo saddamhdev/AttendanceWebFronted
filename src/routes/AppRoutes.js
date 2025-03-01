@@ -13,23 +13,28 @@ import UserAtAGlance from "../pages/UserAtAGlance";
 import DownloadAllEmployeeAttendanceData from "../pages/DownloadAllEmployeeAttendanceData";
 import UpdateAttendenceAdd from "../pages/UpdateAttendenceAdd";
 import Summary from "../pages/Summary";
+import ProtectedRoute from "../pages/ProtectedRoute"; // Import ProtectedRoute
+
 function App() {
   return (
     <Router>
       <Routes>
+        {/* Public Route */}
         <Route path="/" element={<Login />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/error" element={<Error />} />
-        <Route path="/reg" element={<RegistrationForm />} />
-        <Route path="/EmployeeList" element={<EmployeeList />} />
-        <Route path="/AttendenceAdd" element={<AttendenceAdd />} />
-        <Route path="/GlobalSetting" element={<GlobalSetting />} />
-        <Route path="/LocalSetting" element={<LocalSetting />} />
-        <Route path="/Position" element={<Position />} />
-        <Route path="/UserAtAGlance" element={<UserAtAGlance />} />
-        <Route path="/DownloadAllEmployeeAttendanceData" element={<DownloadAllEmployeeAttendanceData />} />
-        <Route path="/UpdateAttendenceAdd" element={<UpdateAttendenceAdd />} />
-        <Route path="/Summary" element={<Summary />} />
+
+        {/* Protected Routes */}
+        <Route path="/home" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/error" element={<ProtectedRoute><Error /></ProtectedRoute>} />
+        <Route path="/reg" element={<ProtectedRoute><RegistrationForm /></ProtectedRoute>} />
+        <Route path="/EmployeeList" element={<ProtectedRoute><EmployeeList /></ProtectedRoute>} />
+        <Route path="/AttendenceAdd" element={<ProtectedRoute><AttendenceAdd /></ProtectedRoute>} />
+        <Route path="/GlobalSetting" element={<ProtectedRoute><GlobalSetting /></ProtectedRoute>} />
+        <Route path="/LocalSetting" element={<ProtectedRoute><LocalSetting /></ProtectedRoute>} />
+        <Route path="/Position" element={<ProtectedRoute><Position /></ProtectedRoute>} />
+        <Route path="/UserAtAGlance" element={<ProtectedRoute><UserAtAGlance /></ProtectedRoute>} />
+        <Route path="/DownloadAllEmployeeAttendanceData" element={<ProtectedRoute><DownloadAllEmployeeAttendanceData /></ProtectedRoute>} />
+        <Route path="/UpdateAttendenceAdd" element={<ProtectedRoute><UpdateAttendenceAdd /></ProtectedRoute>} />
+        <Route path="/Summary" element={<ProtectedRoute><Summary /></ProtectedRoute>} />
       </Routes>
     </Router>
   );

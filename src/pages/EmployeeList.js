@@ -1,11 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { Table, Form, Button, Spinner,Modal } from "react-bootstrap";
+import { Table, Form, Button, Spinner,Modal,Collapse  } from "react-bootstrap";
 import Navbar from "../layouts/Navbar";
 import { addEmployee,getAllEmployees,deleteEmployee } from "../services/employeeService";
 const EmployeeTable = () => {
   const [showModal, setShowModal] = useState(false);
   const [employees, setEmployees] = useState([]);
-  const [formData, setFormData] = useState({ idNumber: "", name: "", designation: "", joinDate: "" });
+  const [formData, setFormData] = useState({ 
+    idNumber: "", 
+    name: "", 
+    designation: "", 
+    joinDate: "", 
+    email: "", 
+    password: "",
+    type: "Employee" // Default type
+  });
+
+  const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [endDate, setEndDate] = useState("");
   const [selectedEmployee, setSelectedEmployee] = useState(null);
@@ -14,8 +24,7 @@ const EmployeeTable = () => {
     try {
       const response = await getAllEmployees("1"); // Fetch all employees with status 1
   
-      console.log("Fetched employees:", response); // Ensure you're logging the resolved data
-
+     
   
       // Check if the response contains an array and set employees
       if (Array.isArray(response)) {
@@ -40,16 +49,28 @@ const EmployeeTable = () => {
   const handleAdd = async () => {
     setLoading(true);
     try {
-      await addEmployee(formData, employees.length+1);
-      setEmployees([...employees, formData]);
-      setFormData({ idNumber: "", name: "", designation: "", joinDate: "" });
+        const response = await addEmployee(formData, employees.length + 1);
+      
+
+        if (response.status === 200) {
+            alert("Successfully Inserted");
+            setEmployees([...employees, formData]);
+            setFormData({ idNumber: "", name: "", designation: "", joinDate: "", email: "", password: "", type: "Employee" });
+           setShowForm(false);
+          } else if (response.status === 409) {
+            alert("Failed to Insert: Employee already exists.");
+        } else {
+            alert("An unexpected error occurred.");
+        }
+
     } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to add employee.");
+        console.error("Error:", error);
+        alert("Failed to add employee.");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
+
  
 
   const handleDeleteClick = (employee) => {
@@ -83,28 +104,56 @@ const EmployeeTable = () => {
     <>
       <Navbar />
       <div className="container mt-4" style={{ paddingTop: "100px" }}>
-        <div className="d-flex flex-wrap mb-3">
-          <Form.Control type="text" name="idNumber" placeholder="ID Number" value={formData.idNumber} onChange={handleChange} className="me-2 mb-2" />
-          <Form.Control type="text" name="name" placeholder="Name" value={formData.name} onChange={handleChange} className="me-2 mb-2" />
-          <Form.Control type="text" name="designation" placeholder="Designation" value={formData.designation} onChange={handleChange} className="me-2 mb-2" />
-          <Form.Control type="date" name="joinDate" value={formData.joinDate} onChange={handleChange} className="me-2 mb-2" />
-          <Button variant="success" onClick={handleAdd} className="mb-2 d-flex align-items-center" disabled={loading}>
-            {loading ? (
-              <>
-                <Spinner animation="border" size="sm" className="me-2" />
-                Adding...
-              </>
-            ) : (
-              "Add"
-            )}
-          </Button>
-        </div>
+        {/* Toggle Button */}
+        <Button 
+          variant="primary" 
+          onClick={() => setShowForm(!showForm)} 
+          aria-controls="employee-form-collapse"
+          aria-expanded={showForm}
+        >
+          {showForm ? "Hide Form" : "Show Form"}
+        </Button>
 
-        <Table bordered hover>
+        {/* Collapsible Form */}
+        <Collapse in={showForm}>
+          <div id="employee-form-collapse" className="mt-3 ">
+            <div className="d-flex flex-wrap mb-3">
+              <Form.Control type="text" name="idNumber" placeholder="ID Number" value={formData.idNumber} onChange={handleChange} className="me-2 mb-2" />
+              <Form.Control type="text" name="name" placeholder="Name" value={formData.name} onChange={handleChange} className="me-2 mb-2" />
+              <Form.Control type="email" name="email" placeholder="Email" value={formData.email} onChange={handleChange} className="me-2 mb-2" />
+              <Form.Control type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} className="me-2 mb-2" />
+              <Form.Control type="text" name="designation" placeholder="Designation" value={formData.designation} onChange={handleChange} className="me-2 mb-2" />
+              <Form.Control type="date" name="joinDate" value={formData.joinDate} onChange={handleChange} className="me-2 mb-2" />
+              {/* New Type Dropdown */}
+            <Form.Select name="type" value={formData.type} onChange={handleChange} className="me-2 mb-2">
+              <option value="Author">Author</option>
+              <option value="Admin">Admin</option>
+              <option value="Employee">Employee</option>
+            </Form.Select>
+             
+             
+              <Button variant="success" onClick={handleAdd} className="mb-2 d-flex align-items-center" disabled={loading}>
+                {loading ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    Adding...
+                  </>
+                ) : (
+                  "Add"
+                )}
+              </Button>
+            </div>
+          </div>
+        </Collapse>
+
+        <Table bordered hover responsive className="mt-4">
           <thead>
             <tr>
               <th>ID Number</th>
               <th>Name</th>
+              <th>Email</th>
+              <th>Password</th>
+              <th>Type</th>
               <th>Join Date</th>
               <th>Designation</th>
               <th>Edit</th>
@@ -121,6 +170,9 @@ const EmployeeTable = () => {
                 <tr key={index} className="text-center">
                   <td>{employee.idNumber}</td>
                   <td>{employee.name}</td>
+                  <td>{employee.email}</td>
+                  <td>{employee.password}</td>
+                  <td>{employee.type}</td>
                   <td>{employee.joinDate}</td>
                   <td>{employee.designation}</td>
                   <td><Button variant="warning">Edit</Button></td>

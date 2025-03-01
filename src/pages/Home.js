@@ -1,15 +1,26 @@
-import React from "react";
-import Navbar from "../layouts/Navbar";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
-  return (
-    <>
-    <Navbar />
-    <div className="d-flex justify-content-center align-items-center vh-100">
-      <h1>Welcome to the Home Page</h1>
-    </div>
-    </>
-  );
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const expiryTime = sessionStorage.getItem("expiry");
+
+    if (expiryTime) {
+      const remainingTime = expiryTime - Date.now();
+
+      const timeout = setTimeout(() => {
+        sessionStorage.removeItem("isAuthenticated");
+        sessionStorage.removeItem("expiry");
+        navigate("/");
+      }, remainingTime);
+
+      return () => clearTimeout(timeout); // Cleanup timeout on unmount
+    }
+  }, [navigate]);
+
+  return <h1>Welcome to Home Page</h1>;
 };
 
 export default Home;

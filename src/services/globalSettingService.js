@@ -25,7 +25,7 @@ const addGlobalSettingData = async (GlobalSettingData) => {
         status: "1", // Default status, change if needed
      
     };
-    console.log(updatedGlobalSettingData);
+  
     const response = await axios.post(API_URL, updatedGlobalSettingData);
     return response.data;
   } catch (error) {

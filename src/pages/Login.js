@@ -1,27 +1,28 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
-export default function Login() {
+const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // Initialize useNavigate
+  const navigate = useNavigate();
 
   const handleLogin = (e) => {
     e.preventDefault();
     
-    // Dummy authentication check
     if (email === "admin@example.com" && password === "password") {
-      navigate("/home"); // Redirect to home page
+      const sessionExpiryTime = Date.now() + 1 * 60 * 1000; // Set expiry (10 minutes)
+      
+      sessionStorage.setItem("isAuthenticated", "true");
+      sessionStorage.setItem("expiry", sessionExpiryTime); // Store expiry time
+  
+      navigate("/AttendenceAdd");
     } else {
-        navigate("/reg"); // Redirect to error page on failure
+      navigate("/reg");
     }
   };
-  const handleEmail = (e) => {
-    setEmail(e.target.value)
-  }
-
-
+  
+  
 
   return (
     <div className="d-flex justify-content-center align-items-center vh-100" style={{ backgroundColor: "#f4f6f9" }}>
@@ -35,7 +36,7 @@ export default function Login() {
               className="form-control" 
               placeholder="Enter your email" 
               value={email} 
-              onChange={(e) => handleEmail(e)} 
+              onChange={(e) => setEmail(e.target.value)} 
               required 
             />
           </div>
@@ -57,4 +58,6 @@ export default function Login() {
   );
 }
 
- 
+
+
+ export default Login;

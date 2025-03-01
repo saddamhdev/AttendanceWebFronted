@@ -21,7 +21,6 @@ const AttendanceSheet = () => {
     try {
       const response = await getAttendanceDataForFixDay(selectedDate);
      
-      console.log("Fetched employees:", response);
       setEmployees(Array.isArray(response) && response.length > 0 ? response : []);
       setOldData(JSON.parse(JSON.stringify(Array.isArray(response) && response.length > 0 ? response : [])));  // Deep copy
     } catch (error) {
