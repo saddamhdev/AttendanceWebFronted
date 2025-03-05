@@ -2,15 +2,19 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+import { loginEmloyee } from "../services/employeeService";
+
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async(e) => {
     e.preventDefault();
-    
-    if (email === "admin@example.com" && password === "password") {
+
+    const response = await loginEmloyee(email, password);
+   
+    if (response === "Authenticated") {
       const sessionExpiryTime = Date.now() + 1 * 60 * 1000; // Set expiry (10 minutes)
       
       sessionStorage.setItem("isAuthenticated", "true");

@@ -3,7 +3,7 @@ import axios from "axios";
 const API_URL = "http://localhost:8080/api/user/insert"; 
 const GET_API_URL = "http://localhost:8080/api/user/getAll";
 const Delete_API_URL = "http://localhost:8080/api/user/delete";
-
+const Login_API_URL = "http://localhost:8080/api/user/login";
 // Fetch the token from the backend
 const fetchToken = async () => {
   const response = await axios.get("http://localhost:8181/api/auth/token");
@@ -72,4 +72,19 @@ const deleteEmployee = async (id, endDate) => {
   }
 };
 
-export { addEmployee, getAllEmployees, deleteEmployee };
+// Function to delete an employee
+const loginEmloyee = async (email, password) => {
+  try {
+    const token = await getToken(); // ✅ Fix: Await getToken()
+    const response = await axios.post(Login_API_URL, { email, password }, {
+      headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
+    });
+    return response.data;
+  } catch (error) {
+    //console.error("Error deleting employee:", error);
+    throw error;
+  }
+};
+
+
+export { addEmployee, getAllEmployees, deleteEmployee ,loginEmloyee};
