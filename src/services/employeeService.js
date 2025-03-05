@@ -81,7 +81,7 @@ const loginEmloyee = async (email, password) => {
     });
     return response.data;
   } catch (error) {
-    //console.error("Error deleting employee:", error);
+    console.error("Error deleting employee:", error);
     throw error;
   }
 };
