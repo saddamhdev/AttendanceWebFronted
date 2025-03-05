@@ -1,13 +1,17 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8181/api/positionSetting/insert"; // Your backend API URL
-const GET_API_URL = "http://localhost:8181/api/positionSetting/getAll"; // Assuming your API has a GET endpoint for all employees
-const Delete_API_URL = "http://localhost:8181/api/positionSetting/delete"; // Assuming your API has a GET endpoint for all employees
-const Update_API_URL = "http://localhost:8181/api/positionSetting/updateSortingPosition"; 
+import getToken from "./Auth";
+const API_URL = "http://localhost:8181/api/positionSetting/insert"; 
+const GET_API_URL = "http://localhost:8181/api/positionSetting/getAll"; 
+const DELETE_API_URL = "http://localhost:8181/api/positionSetting/delete"; 
+const UPDATE_API_URL = "http://localhost:8181/api/positionSetting/updateSortingPosition"; 
+
+
+
 const formatCurrentTime = () => {
   const now = new Date();
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0"); // Ensure two digits
+  const month = String(now.getMonth() + 1).padStart(2, "0"); 
   const day = String(now.getDate()).padStart(2, "0");
   const hours = String(now.getHours()).padStart(2, "0");
   const minutes = String(now.getMinutes()).padStart(2, "0");
@@ -19,62 +23,64 @@ const formatCurrentTime = () => {
 const addPositionSettingData = async (PositionSettingData) => {
   try {
     const updatedPositionSettingData = {
-          // Use formatted timestamp
-        ...PositionSettingData,
-        currentTime: formatCurrentTime(),
-        status: "1", // Default status, change if needed
-     
+      ...PositionSettingData,
+      currentTime: formatCurrentTime(),
+      status: "1", 
     };
-  
-    const response = await axios.post(API_URL, updatedPositionSettingData);
+
+    const response = await axios.post(API_URL, updatedPositionSettingData, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
     return response.data;
   } catch (error) {
     throw error;
   }
 };
 
-// Function to retrieve all employees with a status filter
 const getAllPositionData = async (status) => {
-    try {
-      const response = await axios.get(GET_API_URL, {
-        params: { status }, // Send the status as a query parameter
-      });
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const deletePositionData = async (row) => {
-    
-    try {
-        const response = await axios.delete(Delete_API_URL, {
-            data: row, // ✅ Send data in the config object
-        });
-       
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const updatePositionData = async (row) => {
-  
-    try {
-        // Send the data in the request body
-        const response = await axios.post(Update_API_URL, row, {
-            headers: {
-                'Content-Type': 'application/json', // Ensure it's set to JSON
-            }
-        });
-     
-        return response.data; // Return the response data from the API
-    } catch (error) {
-     
-        throw error; // Rethrow the error if needed
-    }
+  try {
+    const response = await axios.get(GET_API_URL, {
+      params: { status },
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 };
 
-  
+const deletePositionData = async (row) => {
+  try {
+    const response = await axios.delete(DELETE_API_URL, {
+      data: row,
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
-export { addPositionSettingData,getAllPositionData ,deletePositionData,updatePositionData};
+const updatePositionData = async (row) => {
+  try {
+    const response = await axios.post(UPDATE_API_URL, row, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export { addPositionSettingData, getAllPositionData, deletePositionData, updatePositionData };
