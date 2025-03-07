@@ -1,24 +1,11 @@
 import axios from "axios";
-
+import getToken from "./Auth";
 const API_URL = "http://localhost:8080/api/user/insert"; 
 const GET_API_URL = "http://localhost:8080/api/user/getAll";
 const Delete_API_URL = "http://localhost:8080/api/user/delete";
 const Login_API_URL = "http://localhost:8080/api/user/login";
 // Fetch the token from the backend
-const fetchToken = async () => {
-  const response = await axios.get("http://localhost:8181/api/auth/token");
-  return response.data;
-};
 
-// Store the token in localStorage
-const getToken = async () => {
-  let token = localStorage.getItem("authToken");
-  if (!token) {
-    token = await fetchToken();
-    localStorage.setItem("authToken", token);
-  }
-  return token;
-};
 
 // Function to add an employee
 const addEmployee = async (employeeData, size) => {
@@ -75,9 +62,8 @@ const deleteEmployee = async (id, endDate) => {
 // Function to delete an employee
 const loginEmloyee = async (email, password) => {
   try {
-    const token = await getToken(); // ✅ Fix: Await getToken()
     const response = await axios.post(Login_API_URL, { email, password }, {
-      headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
+      headers: {  "Content-Type": "application/json" }
     });
     return response.data;
   } catch (error) {

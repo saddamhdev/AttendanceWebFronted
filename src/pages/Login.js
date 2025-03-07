@@ -11,15 +11,14 @@ const Login = () => {
 
   const handleLogin = async(e) => {
     e.preventDefault();
-
+    
     const response = await loginEmloyee(email, password);
    
-    if (response === "Authenticated") {
-      const sessionExpiryTime = Date.now() + 1 * 60 * 1000; // Set expiry (10 minutes)
-      
+    if (response.result === "Authenticated") {
+      const sessionExpiryTime = Date.now() + 10 * 60 * 1000; // Set expiry (10 minutes)
+      localStorage.setItem("authToken", response.token);
       sessionStorage.setItem("isAuthenticated", "true");
       sessionStorage.setItem("expiry", sessionExpiryTime); // Store expiry time
-  
       navigate("/AttendenceAdd");
     } else {
       navigate("/reg");
