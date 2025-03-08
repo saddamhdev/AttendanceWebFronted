@@ -10,6 +10,7 @@ const getToken = () => {
             console.warn("No token found in localStorage");
             return null;
         }
+       // alert(token);
         return token;
     } catch (error) {
         console.error("Failed to get token:", error);

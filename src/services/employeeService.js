@@ -30,20 +30,25 @@ const addEmployee = async (employeeData, size) => {
   }
 };
 
-// Function to retrieve all employees
 const getAllEmployees = async (status) => {
   try {
-    const token = await getToken(); // ✅ Fix: Await getToken()
+    const token = await getToken(); // ✅ Await token retrieval
     const response = await axios.get(GET_API_URL, {
       headers: { "Authorization": `Bearer ${token}` },
       params: { status },
     });
     return response.data;
   } catch (error) {
-    console.error("Error fetching employees:", error);
+    if (error.response && error.response.status === 403) {
+      console.warn("Unauthorized access. Redirecting to login...");
+      window.location.href = "/"; // 🔴 Redirect to login page
+    } else {
+      console.error("Error fetching employees:", error);
+    }
     throw error;
   }
 };
+
 
 // Function to delete an employee
 const deleteEmployee = async (id, endDate) => {
