@@ -1,22 +1,72 @@
 import axios from "axios";
 
 const API_URL = "http://localhost:8080/api/user/token";
-
+const API_URL_REFRESH = "http://localhost:8080/api/user/refresh";
 
 const getToken = () => {
-  try {
-      const token = localStorage.getItem("authToken"); // ✅ Fetch token from localStorage
-      
-      if (!token) {
-          console.warn("No token found in localStorage");
-          return null;
+    try {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+            console.warn("No token found in localStorage");
+            return null;
+        }
+        return token;
+    } catch (error) {
+        console.error("Failed to get token:", error);
+        return null;
+    }
+};
+
+const isTokenExpired = () => {
+    const expiry = sessionStorage.getItem("expiry");
+    if (!expiry) return true;
+    return Date.now() > parseInt(expiry);
+};
+
+const handleSessionExpiry = () => {
+    if (isTokenExpired()) {
+        //alert("Session expired. Please log in again.");
+        sessionStorage.clear();
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("refreshToken");
+        window.location.href = "/";
+    }
+};
+
+const checkAndRefreshToken = async () => {
+  console.log("Checking token refresh...");
+  
+  if (isTokenExpired()) {
+      console.log("Token expired, attempting to refresh...");
+      try {
+          const refreshToken = localStorage.getItem("refreshToken");
+          if (!refreshToken) {
+              console.warn("No refresh token found, redirecting to login.");
+              handleSessionExpiry();
+              return;
+          }
+
+          const response = await axios.post(API_URL_REFRESH, { refreshToken });
+
+          if (response.data.accessToken) {
+              console.log("New access token received:", response.data.accessToken);
+
+              localStorage.setItem("authToken", response.data.accessToken);
+              sessionStorage.setItem("expiry", Date.now() + 2 * 60 * 1000); // Extend session
+              
+          } else {
+              console.error("Refresh failed: No access token received.");
+              handleSessionExpiry();
+          }
+      } catch (error) {
+          console.error("Error refreshing token:", error.response?.data || error.message);
+          handleSessionExpiry();
       }
-      return token;
-  } catch (error) {
-      console.error("Failed to get token:", error);
-      return null;
+  } else {
+      console.log("Token is still valid.");
   }
 };
 
-export default getToken; // ✅ Export correctly
 
+// Export all functions
+export  { getToken, isTokenExpired, checkAndRefreshToken, handleSessionExpiry };

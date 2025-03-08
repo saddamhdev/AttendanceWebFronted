@@ -15,11 +15,13 @@ const Login = () => {
     const response = await loginEmloyee(email, password);
    
     if (response.result === "Authenticated") {
-      const sessionExpiryTime = Date.now() + 10 * 60 * 1000; // Set expiry (10 minutes)
+      const sessionExpiryTime = Date.now() + 2 * 60 * 1000; // Set expiry (10 minutes)
       localStorage.setItem("authToken", response.token);
+      localStorage.setItem("refreshToken", response.refreshToken);
       sessionStorage.setItem("isAuthenticated", "true");
       sessionStorage.setItem("expiry", sessionExpiryTime); // Store expiry time
       navigate("/AttendenceAdd");
+      window.location.reload(); // ✅ Reload to trigger useEffect in `App.js`
     } else {
       navigate("/reg");
     }

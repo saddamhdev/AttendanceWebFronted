@@ -1,5 +1,5 @@
 import axios from "axios";
-import getToken from "./Auth"; // Import getToken function
+import {getToken} from "./Auth"; // Import getToken function
 
 const API_URL = "http://localhost:8181/api/attendance/insert";
 const exportAllAttendanceData_URL = "http://localhost:8181/api/attendance/exportAllAttendanceData";

@@ -1,5 +1,5 @@
 import axios from "axios";
-import getToken from "./Auth";
+import {getToken} from "./Auth";
 
 const API_URL = "http://localhost:8181/api/globalSetting/insert"; 
 const GET_API_URL = "http://localhost:8181/api/globalSetting/getAll"; 

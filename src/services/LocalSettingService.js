@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import getToken from "./Auth";
+import {getToken} from "./Auth";
 const API_URL = "http://localhost:8181/api/localSetting/insert"; 
 const GET_API_URL = "http://localhost:8181/api/localSetting/getAll"; 
 const DELETE_API_URL = "http://localhost:8181/api/localSetting/delete"; 
