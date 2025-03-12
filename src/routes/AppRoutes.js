@@ -14,6 +14,12 @@ import DownloadAllEmployeeAttendanceData from "../pages/DownloadAllEmployeeAtten
 import UpdateAttendenceAdd from "../pages/UpdateAttendenceAdd";
 import Summary from "../pages/Summary";
 import ProtectedRoute from "../pages/ProtectedRoute"; // Import ProtectedRoute
+import Component from "../Developer/Component";
+import Menu from "../Developer/Menu";
+import Page from "../Developer/Page";
+import Role from "../Owner/Role";
+import Permission from "../Owner/Permission";
+
 
 function App() {
   return (
@@ -35,6 +41,11 @@ function App() {
         <Route path="/DownloadAllEmployeeAttendanceData" element={<ProtectedRoute><DownloadAllEmployeeAttendanceData /></ProtectedRoute>} />
         <Route path="/UpdateAttendenceAdd" element={<ProtectedRoute><UpdateAttendenceAdd /></ProtectedRoute>} />
         <Route path="/Summary" element={<ProtectedRoute><Summary /></ProtectedRoute>} />
+        <Route path="/Component" element={<ProtectedRoute><Component /></ProtectedRoute>} />
+        <Route path="/Menu" element={<ProtectedRoute><Menu /></ProtectedRoute>} />
+        <Route path="/Page" element={<ProtectedRoute><Page /></ProtectedRoute>} />  
+        <Route path="/Role" element={<ProtectedRoute><Role /></ProtectedRoute>} />  
+        <Route path="/Permission" element={<ProtectedRoute><Permission /></ProtectedRoute>} />
       </Routes>
     </Router>
   );

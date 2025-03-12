@@ -30,6 +30,38 @@ const Navbar = () => {
                 className="nav-link"
                 href="#"
               >
+                Owner
+              </a>
+
+              {/* Sub-navbar for hover */}
+              <ul className="dropdown-menu">
+                <li><a className="dropdown-item" href="/Role">Role</a></li>
+                <li><a className="dropdown-item" href="/Permission">Permission</a></li>
+              </ul>
+            </li>
+            <li className="nav-item dropdown hover-dropdown">
+              <a
+                className="nav-link"
+                href="#"
+              >
+                Developer
+              </a>
+
+              {/* Sub-navbar for hover */}
+              <ul className="dropdown-menu">
+              
+                <li><a className="dropdown-item" href="/Menu">Menus</a></li>
+                <li><a className="dropdown-item" href="/Page">Pages</a></li>
+                <li><a className="dropdown-item" href="/Component">Components</a></li>
+                
+               
+              </ul>
+            </li>
+          <li className="nav-item dropdown hover-dropdown">
+              <a
+                className="nav-link"
+                href="#"
+              >
                 Attendence
               </a>
 
