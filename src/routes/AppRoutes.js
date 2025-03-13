@@ -19,6 +19,8 @@ import Menu from "../Developer/Menu";
 import Page from "../Developer/Page";
 import Role from "../Owner/Role";
 import Permission from "../Owner/Permission";
+import AssignPermission from "../Owner/AssignPermission";
+import UpdatePermission from "../Owner/UpdatePermission";
 
 
 function App() {
@@ -46,6 +48,8 @@ function App() {
         <Route path="/Page" element={<ProtectedRoute><Page /></ProtectedRoute>} />  
         <Route path="/Role" element={<ProtectedRoute><Role /></ProtectedRoute>} />  
         <Route path="/Permission" element={<ProtectedRoute><Permission /></ProtectedRoute>} />
+        <Route path="/AssignPermission" element={<ProtectedRoute><AssignPermission /></ProtectedRoute>} />
+        <Route path="/UpdatePermission" element={<ProtectedRoute><UpdatePermission /></ProtectedRoute>} />
       </Routes>
     </Router>
   );

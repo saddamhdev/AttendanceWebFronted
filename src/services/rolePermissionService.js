@@ -6,7 +6,10 @@ const API_URL_PERMISSION = "http://localhost:8080/api/role/permission";
 const API_URL_Page = "http://localhost:8080/api/developer/insertPage"; 
 const API_URL_Component = "http://localhost:8080/api/developer/insertComponent"; 
 const GET_API_URL = "http://localhost:8080/api/role/getAll";
+const GET_API_URL_SINGLE_ROLE_DATA = "http://localhost:8080/api/role/getSingleRoleData";
+const GET_API_URL_USERS = "http://localhost:8080/api/user/getAll";
 const GET_API_URL_ROLE = "http://localhost:8080/api/role/getAllRole";
+const API_URL_AssignPermission = "http://localhost:8080/api/role/assignPermission";
 const Delete_API_URL = "http://localhost:8080/api/user/delete";
 
 // Fetch the token from the backend
@@ -103,6 +106,26 @@ const deleteEmployee = async (id, endDate) => {
     }
   };
 
+ 
+  const getAllUsers = async (status) => {
+    try {
+      const token = await getToken(); // ✅ Await token retrieval
+      const response = await axios.get(GET_API_URL_USERS, {
+        headers: { "Authorization": `Bearer ${token}` },
+        params: { status },
+      });
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.status === 403) {
+        console.warn("Unauthorized access. Redirecting to login...");
+        window.location.href = "/"; // 🔴 Redirect to login page
+      } else {
+        console.error("Error fetching employees:", error);
+      }
+      throw error;
+    }
+  };
+  
   const getAllRole = async (status) => {
    
     try {
@@ -146,4 +169,46 @@ const saveRolesToDatabase = async (selectedRole,employeeData) => {
       throw error;
     }
   };
-  export {addEmployee,deleteEmployee,getAllEmployees,addEmployeePage,addEmployeeComponent,getAllRole,saveRolesToDatabase};
+
+   // Fetch the token from the backend
+const addAssignPermission = async (employeeData) => {
+
+  try {
+    const updatedEmployeeData = {
+      ...employeeData
+     
+    };
+
+    const token = await getToken();  // ✅ Fix: Await getToken()
+
+    const response = await axios.post(API_URL_AssignPermission, updatedEmployeeData, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    return response;
+  } catch (error) {
+    console.error("Error adding employee:", error);
+    throw error;
+  }
+};
+const getAllRoleDataByRole = async (status) => {
+   
+  try {
+    const token = await getToken(); // ✅ Await token retrieval
+    const response = await axios.get(GET_API_URL_SINGLE_ROLE_DATA, {
+      headers: { "Authorization": `Bearer ${token}` },
+      params: { status },
+    });
+    
+    
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 403) {
+      console.warn("Unauthorized access. Redirecting to login...");
+      window.location.href = "/"; // 🔴 Redirect to login page
+    } else {
+      console.error("Error fetching employees:", error);
+    }
+    throw error;
+  }
+};
+  export {addEmployee,deleteEmployee,getAllUsers,getAllEmployees,addEmployeePage,addEmployeeComponent,getAllRole,saveRolesToDatabase,addAssignPermission,getAllRoleDataByRole};

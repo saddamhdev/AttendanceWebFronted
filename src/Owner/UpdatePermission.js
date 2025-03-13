@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getAllEmployees, getAllRole, saveRolesToDatabase } from "../services/rolePermissionService"; // Import API service
+import { getAllEmployees, getAllRole, saveRolesToDatabase,getAllRoleDataByRole } from "../services/rolePermissionService"; // Import API service
 import Navbar from "../layouts/Navbar";
 
 const RoleManagement = () => {
@@ -11,6 +11,7 @@ const RoleManagement = () => {
   useEffect(() => {
     fetchDeveloper();
     fetchRole();
+    
   }, []);
 
   // Fetch role data from the backend
@@ -81,11 +82,58 @@ const RoleManagement = () => {
     }
   };
 
+  const roleChangeHandler = async (e) => {
+    setSelectedRole(e.target.value);
+  
+    try {
+      const response = await getAllRoleDataByRole(e.target.value);
+      console.log("API Response:", response); // Log the full response to inspect its structure
+  
+      if (response && Array.isArray(response)) {
+        setDeveloperData(response);
+  
+        const activeRoles = {};
+  
+        response.forEach((menu) => {
+          if (menu.menuStatus === "ACTIVE") { // Fix here
+            activeRoles[menu.menuName] = true;
+          }
+          (menu.pages || []).forEach((page) => {
+            const pagePath = `${menu.menuName}.${page.pageName}`;
+            if (page.pageStatus === "ACTIVE") { // Fix here
+              activeRoles[pagePath] = true;
+            }
+            (page.components || []).forEach((component) => {
+              const componentPath = `${pagePath}.${component.componentName}`;
+              if (component.componentStatus === "ACTIVE") { // Fix here
+                activeRoles[componentPath] = true;
+              }
+            });
+          });
+        });
+  
+        console.log("Active Roles:", activeRoles); // This should now populate correctly
+        setSelectedRoles(activeRoles);
+      } else {
+        setDeveloperData([]);
+        setSelectedRoles({});
+      }
+    } catch (error) {
+      console.error("Error fetching role data:", error);
+      setDeveloperData([]);
+      setSelectedRoles({});
+    }
+  };
+  
+  
+  
+  
+
   return (
     <>
       <Navbar />
       <div className="container mt-4" style={{ paddingTop: "100px" }}>
-        <h2>Permission Management</h2>
+        <h2>View Permission </h2>
 
         <div className="form-group mt-4 mb-4">
           <label htmlFor="roleSelect">Select Role:</label>
@@ -94,7 +142,9 @@ const RoleManagement = () => {
             className="form-control"
             value={selectedRole}
             onChange={(e) => {
-              setSelectedRole(e.target.value); // Update selected role
+             // setSelectedRole(e.target.value); // Update selected role
+              roleChangeHandler(e);
+
             }}
           >
             <option value="">--Select a Role--</option>
@@ -180,7 +230,7 @@ const RoleManagement = () => {
 
         {/* Save button to send selected roles to the database */}
         <button onClick={savePermissions} className="btn btn-primary mt-4">
-          Save Permissions
+          Update Permissions
         </button>
 
         <h3>Selected Permissions:</h3>

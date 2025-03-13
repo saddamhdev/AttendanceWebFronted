@@ -36,7 +36,9 @@ const Navbar = () => {
               {/* Sub-navbar for hover */}
               <ul className="dropdown-menu">
                 <li><a className="dropdown-item" href="/Role">Role</a></li>
-                <li><a className="dropdown-item" href="/Permission">Permission</a></li>
+                <li><a className="dropdown-item" href="/Permission">Add Permission</a></li>
+                <li><a className="dropdown-item" href="/UpdatePermission">Update Permission</a></li>
+                <li><a className="dropdown-item" href="/AssignPermission">Assign Permission</a></li>
               </ul>
             </li>
             <li className="nav-item dropdown hover-dropdown">
