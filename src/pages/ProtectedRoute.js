@@ -1,5 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 
 const ProtectedRoute = ({ children }) => {
   const isAuthenticated = sessionStorage.getItem("isAuthenticated");

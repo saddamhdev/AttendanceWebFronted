@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { getAllEmployees, getAllRole, saveRolesToDatabase } from "../services/rolePermissionService"; // Import API service
+import { getAllEmployees, getAllRole, saveRolesToDatabase ,getAllRoleDataByRole} from "../services/rolePermissionService"; // Import API service
 import Navbar from "../layouts/Navbar";
-
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 const RoleManagement = () => {
   const [developerData, setDeveloperData] = useState([]); // State for developer data from DB
   const [roleData, setRoleData] = useState([]); // State for role data from DB
@@ -75,9 +75,55 @@ const RoleManagement = () => {
       } else {
         alert("Failed to save permissions.");
       }
+      window.location.reload(); // ✅ Reload to trigger useEffect in `App.js`
+
     } catch (error) {
       console.error("Error saving permissions:", error);
       alert("Error saving permissions.");
+    }
+  };
+
+  const roleChangeHandler = async (e) => {
+    setSelectedRole(e.target.value);
+  
+    try {
+      const response = await getAllRoleDataByRole(e.target.value);
+      console.log("API Response:", response); // Log the full response to inspect its structure
+  
+      if (response && Array.isArray(response)) {
+        setDeveloperData(response);
+  
+        const activeRoles = {};
+  
+        response.forEach((menu) => {
+          if (menu.menuStatus === "ACTIVE") { // Fix here
+            activeRoles[menu.menuName] = true;
+          }
+          (menu.pages || []).forEach((page) => {
+            const pagePath = `${menu.menuName}.${page.pageName}`;
+            if (page.pageStatus === "ACTIVE") { // Fix here
+              activeRoles[pagePath] = true;
+            }
+            (page.components || []).forEach((component) => {
+              const componentPath = `${pagePath}.${component.componentName}`;
+              if (component.componentStatus === "ACTIVE") { // Fix here
+                activeRoles[componentPath] = true;
+              }
+            });
+          });
+        });
+  
+        console.log("Active Roles:", activeRoles); // This should now populate correctly
+        setSelectedRoles(activeRoles);
+
+      } else {
+        setDeveloperData([]);
+        setSelectedRoles({});
+      }
+    } catch (error) {
+      console.error("Error fetching role data:", error);
+      setDeveloperData([]);
+      setSelectedRoles({});
     }
   };
 
@@ -94,7 +140,7 @@ const RoleManagement = () => {
             className="form-control"
             value={selectedRole}
             onChange={(e) => {
-              setSelectedRole(e.target.value); // Update selected role
+              roleChangeHandler(e);
             }}
           >
             <option value="">--Select a Role--</option>
@@ -179,10 +225,16 @@ const RoleManagement = () => {
         )}
 
         {/* Save button to send selected roles to the database */}
-        <button onClick={savePermissions} className="btn btn-primary mt-4">
-          Save Permissions
-        </button>
+        {checkAccessComponent("Owner","Permission","Save or Update") && (
+            <>
+              <button onClick={savePermissions} className="btn btn-primary mt-4">
+                Save/Update Permissions
+              </button>
 
+            </>
+        )}
+               
+       
         <h3>Selected Permissions:</h3>
         <pre>{JSON.stringify(selectedRoles, null, 2)}</pre>
       </div>

@@ -70,10 +70,12 @@ const deletePositionData = async (row) => {
 };
 
 const updatePositionData = async (row) => {
+
   try {
+    const token = await getToken(); // ✅ Await token retrieval
     const response = await axios.post(UPDATE_API_URL, row, {
       headers: {
-        Authorization: `Bearer ${getToken()}`,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });

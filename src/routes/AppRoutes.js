@@ -5,13 +5,13 @@ import Home from "../pages/Home";
 import Error from "../pages/Error";
 import RegistrationForm from "../pages/RegistrationForm";
 import EmployeeList from "../pages/EmployeeList";
-import AttendenceAdd from "../pages/AttendenceAdd";
+import AttendanceAdd from "../pages/AttendanceAdd";
 import GlobalSetting from "../pages/GlobalSetting";
 import LocalSetting from "../pages/LocalSetting";
 import Position from "../pages/Position";
 import UserAtAGlance from "../pages/UserAtAGlance";
 import DownloadAllEmployeeAttendanceData from "../pages/DownloadAllEmployeeAttendanceData";
-import UpdateAttendenceAdd from "../pages/UpdateAttendenceAdd";
+import UpdateAttendanceAdd from "../pages/UpdateAttendanceAdd";
 import Summary from "../pages/Summary";
 import ProtectedRoute from "../pages/ProtectedRoute"; // Import ProtectedRoute
 import Component from "../Developer/Component";
@@ -21,11 +21,14 @@ import Role from "../Owner/Role";
 import Permission from "../Owner/Permission";
 import AssignPermission from "../Owner/AssignPermission";
 import UpdatePermission from "../Owner/UpdatePermission";
+import { RoleProvider } from "../context/RoleContext";  // Import RoleProvider
 
 
 function App() {
   return (
+  
     <Router>
+        <RoleProvider> 
       <Routes>
         {/* Public Route */}
         <Route path="/" element={<Login />} />
@@ -35,13 +38,13 @@ function App() {
         <Route path="/error" element={<ProtectedRoute><Error /></ProtectedRoute>} />
         <Route path="/reg" element={<ProtectedRoute><RegistrationForm /></ProtectedRoute>} />
         <Route path="/EmployeeList" element={<ProtectedRoute><EmployeeList /></ProtectedRoute>} />
-        <Route path="/AttendenceAdd" element={<ProtectedRoute><AttendenceAdd /></ProtectedRoute>} />
+        <Route path="/AttendanceAdd" element={<ProtectedRoute><AttendanceAdd /></ProtectedRoute>} />
         <Route path="/GlobalSetting" element={<ProtectedRoute><GlobalSetting /></ProtectedRoute>} />
         <Route path="/LocalSetting" element={<ProtectedRoute><LocalSetting /></ProtectedRoute>} />
         <Route path="/Position" element={<ProtectedRoute><Position /></ProtectedRoute>} />
         <Route path="/UserAtAGlance" element={<ProtectedRoute><UserAtAGlance /></ProtectedRoute>} />
         <Route path="/DownloadAllEmployeeAttendanceData" element={<ProtectedRoute><DownloadAllEmployeeAttendanceData /></ProtectedRoute>} />
-        <Route path="/UpdateAttendenceAdd" element={<ProtectedRoute><UpdateAttendenceAdd /></ProtectedRoute>} />
+        <Route path="/UpdateAttendanceAdd" element={<ProtectedRoute><UpdateAttendanceAdd /></ProtectedRoute>} />
         <Route path="/Summary" element={<ProtectedRoute><Summary /></ProtectedRoute>} />
         <Route path="/Component" element={<ProtectedRoute><Component /></ProtectedRoute>} />
         <Route path="/Menu" element={<ProtectedRoute><Menu /></ProtectedRoute>} />
@@ -51,7 +54,9 @@ function App() {
         <Route path="/AssignPermission" element={<ProtectedRoute><AssignPermission /></ProtectedRoute>} />
         <Route path="/UpdatePermission" element={<ProtectedRoute><UpdatePermission /></ProtectedRoute>} />
       </Routes>
+      </RoleProvider>
     </Router>
+    
   );
 }
 

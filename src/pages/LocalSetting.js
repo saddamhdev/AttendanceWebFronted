@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "../layouts/Navbar";
 import { addLocalSettingData,getAllLocalData ,deleteLocalData} from "../services/LocalSettingService";
 import { getAllEmployees } from "../services/employeeService";
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 
 
 const DataTable = () => {
@@ -130,11 +131,24 @@ const DataTable = () => {
           }
         </Form.Select>
 
-        <Button variant="primary" className="me-2" onClick={handleNewButtonClick}>
-          New
-        </Button>
+       
         
-        <Button variant="secondary">History</Button>
+       
+          {checkAccessComponent("User","LocalSetting","Add") && (
+              <>
+                <Button variant="primary" className="me-2" onClick={handleNewButtonClick}>
+                New
+              </Button>
+              </>
+            )}
+
+
+            {checkAccessComponent("User","LocalSetting","History") && (
+              <>
+                 <Button variant="secondary">History</Button>
+              </>
+             )}
+
       </div>
 
 
@@ -149,8 +163,21 @@ const DataTable = () => {
               <th>End Minute</th>
               <th>Total Hours</th>
               <th>Designation</th>
-              <th>Edit</th>
-              <th>Delete</th>
+             
+              {checkAccessComponent("User","LocalSetting","Edit") && (
+              <>
+                 <th>Edit</th>
+               
+              </>
+            )}
+
+
+            {checkAccessComponent("User","LocalSetting","Delete") && (
+              <>
+                  
+                  <th>Delete</th>
+              </>
+             )}
             </tr>
           </thead>
           <tbody>
@@ -164,14 +191,27 @@ const DataTable = () => {
                 <td>{row.endMinute}</td>
                 <td>{row.totalHours}</td>
                 <td>{row.designation}</td>
-                <td>
-                  <Button variant="warning">Edit</Button>
-                </td>
-                <td>
-                  <Button variant="danger" onClick={() => deleteRow(row,index)}>
-                    Delete
-                  </Button>
-                </td>
+                
+               
+                {checkAccessComponent("User","LocalSetting","Edit") && (
+                      <>
+                       <td>
+                        <Button variant="warning">Edit</Button>
+                      </td>
+                      </>
+                    )}
+
+
+                    {checkAccessComponent("User","LocalSetting","Delete") && (
+                      <>
+                        <td>
+                          <Button variant="danger" onClick={() => deleteRow(row,index)}>
+                            Delete
+                          </Button>
+                        </td>
+                      </>
+                    )}
+
               </tr>
             ))}
           </tbody>

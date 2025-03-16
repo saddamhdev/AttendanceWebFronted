@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Table, Form, Button, Spinner,Modal,Collapse  } from "react-bootstrap";
 import Navbar from "../layouts/Navbar";
 import { addEmployee,getAllEmployees,deleteEmployee } from "../services/employeeService";
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
+
 const EmployeeTable = () => {
   const [showModal, setShowModal] = useState(false);
   const [employees, setEmployees] = useState([]);
@@ -20,6 +22,7 @@ const EmployeeTable = () => {
   const [endDate, setEndDate] = useState("");
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [loadingDelete, setLoadingDelete] = useState(null); // Track loading for specific delete button
+  
   const fetchEmployees = async () => {
     try {
       const response = await getAllEmployees("1"); // Fetch all employees with status 1
@@ -105,14 +108,19 @@ const EmployeeTable = () => {
       <Navbar />
       <div className="container mt-4" style={{ paddingTop: "100px" }}>
         {/* Toggle Button */}
-        <Button 
-          variant="primary" 
-          onClick={() => setShowForm(!showForm)} 
-          aria-controls="employee-form-collapse"
-          aria-expanded={showForm}
-        >
-          {showForm ? "Hide Form" : "Show Form"}
-        </Button>
+        {checkAccessComponent("Employee","EmployeeList","Add") && (
+              <>
+                 <Button 
+                  variant="primary" 
+                  onClick={() => setShowForm(!showForm)} 
+                  aria-controls="employee-form-collapse"
+                  aria-expanded={showForm}
+                >
+                  {showForm ? "Hide Form" : "Show Form"}
+                </Button>
+              </>
+         )}
+       
 
         {/* Collapsible Form */}
         <Collapse in={showForm}>
@@ -156,8 +164,17 @@ const EmployeeTable = () => {
               <th>Type</th>
               <th>Join Date</th>
               <th>Designation</th>
-              <th>Edit</th>
-              <th>Delete</th>
+              {checkAccessComponent("Employee","EmployeeList","Edit") && (
+              <>
+                 <th>Edit</th>
+              </>
+            )}
+            {checkAccessComponent("Employee","EmployeeList","Delete") && (
+              <>
+                 <th>Delete</th>
+              </>
+             )}
+              
             </tr>
           </thead>
           <tbody>
@@ -175,8 +192,14 @@ const EmployeeTable = () => {
                   <td>{employee.type}</td>
                   <td>{employee.joinDate}</td>
                   <td>{employee.designation}</td>
-                  <td><Button variant="warning">Edit</Button></td>
-                  <td>
+                  {checkAccessComponent("Employee","EmployeeList","Edit") && (
+                    <>
+                       <td><Button variant="warning">Edit</Button></td>
+                    </>
+                  )}
+                  {checkAccessComponent("Employee","EmployeeList","Delete") && (
+                    <>
+                      <td>
                     <Button 
                       variant="danger" 
                       onClick={() => handleDeleteClick(employee)}
@@ -192,6 +215,10 @@ const EmployeeTable = () => {
                       )}
                     </Button>
                   </td>
+                    </>
+                  )}
+                 
+                 
                 </tr>
               ))
             )}

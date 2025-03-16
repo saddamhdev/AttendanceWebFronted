@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 
 const Error = () => {
   const navigate = useNavigate();

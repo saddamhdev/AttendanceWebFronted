@@ -3,6 +3,8 @@ import { Table, Form, Button } from "react-bootstrap";
 import Navbar from "../layouts/Navbar";
 import { getAllEmployees } from "../services/employeeService";
 import { saveAttendance } from "../services/attendanceDataService";
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
+
 
 const AttendanceSheet = () => {
   const [user, setUser] = useState([])
@@ -186,9 +188,15 @@ const AttendanceSheet = () => {
         </tbody>
       </Table>
 
-      <div className="text-center mt-3">
-          <Button variant="success" onClick={handleSubmit}>Submit</Button>
-        </div>
+
+            {checkAccessComponent("Attendance","AttendanceAdd","Submit") && (
+              <>
+                <div className="text-center mt-3">
+                <Button variant="success" onClick={handleSubmit}>Submit</Button>
+              </div>
+              </>
+            )}
+      
     </div>
     </>
   );

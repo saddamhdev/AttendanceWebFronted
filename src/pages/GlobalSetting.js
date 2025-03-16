@@ -3,6 +3,7 @@ import { Table, Button, Form, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "../layouts/Navbar";
 import { addGlobalSettingData, getAllGlobalData ,deleteGlobalData} from "../services/globalSettingService";
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 
 const DataTable = () => {
   const [rows, setRows] = useState([]);
@@ -84,10 +85,22 @@ const DataTable = () => {
     <>
       <Navbar />
       <div className="container mt-4" style={{ paddingTop: "100px" }}>
-        <Button variant="primary" className="me-2" onClick={handleNewButtonClick}>
-          New
-        </Button>
-        <Button variant="secondary">History</Button>
+            {checkAccessComponent("Setting","GlobalSetting","Add") && (
+              <>
+                <Button variant="primary" className="me-2" onClick={handleNewButtonClick}>
+                New
+              </Button>
+              </>
+            )}
+
+
+            {checkAccessComponent("Setting","GlobalSetting","History") && (
+              <>
+                 <Button variant="secondary">History</Button>
+              </>
+             )}
+        
+       
 
         <Table bordered hover className="mt-3">
           <thead>
@@ -96,8 +109,20 @@ const DataTable = () => {
               <th>End Date</th>
               <th>Late Minute</th>
               <th>Early Minute</th>
-              <th>Edit</th>
-              <th>Delete</th>
+              {checkAccessComponent("Setting","GlobalSetting","Edit") && (
+              <>
+               <th>Edit</th>
+               
+              </>
+            )}
+
+            {checkAccessComponent("Setting","GlobalSetting","Delete") && (
+              <>
+              
+                 <th>Delete</th>
+              </>
+             )}
+              
             </tr>
           </thead>
           <tbody>
@@ -107,14 +132,27 @@ const DataTable = () => {
                 <td>{row.formattedDeathDate}</td>
                 <td>{row.lateMinute}</td>
                 <td>{row.earlyMinute}</td>
-                <td>
+                {checkAccessComponent("Setting","GlobalSetting","Edit") && (
+                    <>
+                   <td>
                   <Button variant="warning">Edit</Button>
-                </td>
-                <td>
+                   </td>
+                    </>
+                  )}
+
+                  {checkAccessComponent("Setting","GlobalSetting","Delete") && (
+                    <>
+                    
+                    <td>
                   <Button variant="danger" onClick={() => deleteRow(row,index)}>
                     Delete
                   </Button>
-                </td>
+                  </td>
+                    </>
+                  )}
+                    
+                
+                
               </tr>
             ))}
           </tbody>

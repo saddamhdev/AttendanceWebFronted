@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Table, Form, Button, Spinner, Modal } from "react-bootstrap";
 import Navbar from "../layouts/Navbar";
 import { getAttendanceDataForFixDay, saveAttendance,updateAttendance } from "../services/attendanceDataService";
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 
 const AttendanceSheet = () => {
   const [employees, setEmployees] = useState([]);
@@ -194,11 +195,16 @@ const AttendanceSheet = () => {
           </tbody>
         </Table>
 
-        {employees.length > 0 && (
+        {checkAccessComponent("Attendance", "UpdateAttendanceAdd", "Update") && employees.length > 0 && (
+          <> 
           <div className="text-center mt-3">
             <Button variant="success" onClick={handleUpdate}>Update</Button>
           </div>
+          </>
         )}
+
+
+       
       </div>
 
       <Modal show={loading} backdrop="static" centered>

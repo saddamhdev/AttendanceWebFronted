@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { addEmployee } from "../services/employeeService"; // Import the service
 import "bootstrap/dist/css/bootstrap.min.css";
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({

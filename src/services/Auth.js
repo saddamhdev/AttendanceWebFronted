@@ -30,6 +30,7 @@ const handleSessionExpiry = () => {
         sessionStorage.clear();
         localStorage.removeItem("authToken");
         localStorage.removeItem("refreshToken");
+        localStorage.removeItem("roleData");
         window.location.href = "/";
     }
 };
@@ -53,7 +54,8 @@ const checkAndRefreshToken = async () => {
               console.log("New access token received:", response.data.accessToken);
 
               localStorage.setItem("authToken", response.data.accessToken);
-              sessionStorage.setItem("expiry", Date.now() + 10 * 60 * 1000); // Extend session
+              localStorage.setItem("roleData", response.data.Role);
+              sessionStorage.setItem("expiry", Date.now() + 2 * 60 * 1000); // Extend session
               
           } else {
               console.error("Refresh failed: No access token received.");

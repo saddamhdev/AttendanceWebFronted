@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "../layouts/Navbar";
 import {addPositionSettingData,getAllPositionData ,deletePositionData,updatePositionData} from "../services/positionService";
 import { addEmployee,getAllEmployees } from "../services/employeeService";
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 
 
 const EditableTable = () => {
@@ -67,14 +68,17 @@ const EditableTable = () => {
                 <td className=" text-center">{row.idNumber}</td>
                 <td className=" text-center">{row.name}</td>
                 <td>
-                  <input
-                    type="text"
-                    className="form-control text-center"
-                    value={editValues[index]}
-                    onChange={(e) => handlePositionChange(index, e.target.value)}
-                    onKeyPress={(e) => handleKeyPress(row,index, e)}
-                  />
-                </td>
+                <input
+                  type="text"
+                  className="form-control text-center"
+                  value={editValues[index]}
+                  onChange={(e) => handlePositionChange(index, e.target.value)}
+                  onKeyPress={(e) => handleKeyPress(row, index, e)}
+                  disabled={!checkAccessComponent("Employee", "Position", "Update")}
+                />
+              </td>
+
+                
               </tr>
             ))}
           </tbody>

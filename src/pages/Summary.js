@@ -3,6 +3,7 @@ import { Table, Form, Button, Modal, Spinner } from "react-bootstrap";
 import Navbar from "../layouts/Navbar";
 import { getAttendanceDataForAnyPeriod, exportDownloadAllAttendanceData,exportSummaryAttendanceData } from "../services/attendanceDataService";
 import { getAllEmployees } from "../services/employeeService";
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 
 const AttendanceSheet = () => {
   const [employees, setEmployees] = useState(null);
@@ -102,9 +103,15 @@ const AttendanceSheet = () => {
               </option>
             ))}
           </Form.Select>
-          <Button variant="dark" onClick={exportData} disabled={!employees || employees.length === 0}>
-            Export Data
-          </Button>
+          {checkAccessComponent("User","Summary","Export") && (
+                    <>
+                      <Button variant="dark" onClick={exportData} disabled={!employees || employees.length === 0}>
+                      Export Data
+                    </Button>
+                      
+                    </>
+                  ) }
+          
         </div>
 
         <div className="table-responsive mt-4">

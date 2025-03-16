@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "../layouts/Navbar";
 import { getAllEmployees } from "../services/employeeService";
 import { getAllAtAGlanceData, exportAtAGlanceData } from "../services/userAtAGlanceService";
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 
 const AttendanceReport = () => {
   const [startDate, setStartDate] = useState(() =>
@@ -114,9 +115,16 @@ const AttendanceReport = () => {
             </Form.Select>
           </Col>
           <Col md={3}>
-            <Button variant="dark" className="w-100" onClick={exportData}>
+
+          {checkAccessComponent("User","UserAtAGlance","Export") && (
+            <>
+              <Button variant="dark" className="w-100" onClick={exportData}>
               Export Data
             </Button>
+              
+            </>
+          ) }
+            
           </Col>
         </Row>
 

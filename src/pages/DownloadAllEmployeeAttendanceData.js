@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Table, Form, Button, Modal, Spinner } from "react-bootstrap";
 import Navbar from "../layouts/Navbar";
 import { getAttendanceData,exportDownloadAllAttendanceData } from "../services/attendanceDataService";
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 
 const AttendanceSheet = () => {
   const [employees, setEmployees] = useState([]);
@@ -60,10 +61,15 @@ const AttendanceSheet = () => {
             <span>End Date: {endDate}</span>
           </div>
         </div>
-        <Button variant="dark" className="w-100" onClick={exportData}>
+        {checkAccessComponent("Download","DownloadAllEmployeeAttendanceData","exportData") && (
+          <>
+             <Button variant="dark" className="w-100" onClick={exportData}>
                       Export Data
-       </Button>
+            </Button>
 
+          </>
+        )}
+       
         <div className="table-responsive mt-4">
           <Table bordered hover className="text-center">
             <thead>

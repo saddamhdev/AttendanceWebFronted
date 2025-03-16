@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getAllEmployees, getAllRole, saveRolesToDatabase,getAllRoleDataByRole } from "../services/rolePermissionService"; // Import API service
 import Navbar from "../layouts/Navbar";
-
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 const RoleManagement = () => {
   const [developerData, setDeveloperData] = useState([]); // State for developer data from DB
   const [roleData, setRoleData] = useState([]); // State for role data from DB

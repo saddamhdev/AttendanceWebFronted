@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Button, Form, Modal, Spinner, Collapse, Table } from "react-bootstrap";
 import {addAssignPermission, addEmployee,deleteEmployee,getAllUsers,getAllEmployees,addEmployeePage,addEmployeeComponent,getAllRole,saveRolesToDatabase } from "../services/rolePermissionService";
 import Navbar from "../layouts/Navbar";
-
+import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
   const [users, setUsers] = useState([]);   // ✅ Add users state
@@ -131,18 +131,27 @@ const EmployeeManagement = () => {
     setFormData({ ...formData, userName: e.target.value });
   };
 
+  
+
   return (
     <>
       <Navbar />
       <div className="container mt-4" style={{ paddingTop: "100px" }}>
-        <Button
-          variant="primary"
-          onClick={() => setShowForm(!showForm)}
-          aria-controls="employee-form-collapse"
-          aria-expanded={showForm}
-        >
-          {showForm ? "Hide Form" : "Assign Role"}
-        </Button>
+       
+           {checkAccessComponent("Owner","Assign Permission","Add") && (
+                   <>
+                     <Button
+                      variant="primary"
+                      onClick={() => setShowForm(!showForm)}
+                      aria-controls="employee-form-collapse"
+                      aria-expanded={showForm}
+                    >
+                      {showForm ? "Hide Form" : "Assign Role"}
+                    </Button>
+       
+                   </>
+               )}
+       
 
         <Collapse in={showForm}>
           <div id="employee-form-collapse" className="mt-3">
@@ -184,8 +193,21 @@ const EmployeeManagement = () => {
             <tr>
               <th>User Name</th>
               <th>Role Name</th>
-              <th>Edit</th>
-              <th>Delete</th>
+              {checkAccessComponent("Owner","Assign Permission","Edit") && (
+                   <>
+                    <th>Edit</th>
+       
+                   </>
+               )}
+       
+             {checkAccessComponent("Owner","Assign Permission","Delete") && (
+                   <>
+                    <th>Delete</th>
+       
+                   </>
+               )}
+       
+              
             </tr>
           </thead>
           <tbody>
@@ -203,10 +225,21 @@ const EmployeeManagement = () => {
                         : "No role"}
                     </td>
 
-                  <td>
+                  
+                 
+
+                  {checkAccessComponent("Owner","Assign Permission","Edit") && (
+                   <>
+                   <td>
                     <Button variant="warning">Edit</Button>
                   </td>
-                  <td>
+       
+                   </>
+               )}
+       
+                 {checkAccessComponent("Owner","Assign Permission","Delete") && (
+                   <>
+                     <td>
                     <Button
                       variant="danger"
                       onClick={() => handleDeleteClick(employee)}
@@ -222,6 +255,9 @@ const EmployeeManagement = () => {
                       )}
                     </Button>
                   </td>
+       
+                   </>
+               )}
                 </tr>
               ))
             )}
