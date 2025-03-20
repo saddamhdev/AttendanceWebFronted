@@ -2,6 +2,9 @@
 import axios from "axios";
 import {getToken} from "./Auth";
 const API_URL = "http://localhost:8080/api/role/insert"; 
+const API_URL_DELETE = "http://localhost:8080/api/role/delete"; 
+const API_URL_DELETE_Permission = "http://localhost:8080/api/role/deletePermission"; 
+const API_URL_Update = "http://localhost:8080/api/role/update"; 
 const API_URL_PERMISSION = "http://localhost:8080/api/role/permission"; 
 const API_URL_Page = "http://localhost:8080/api/developer/insertPage"; 
 const API_URL_Component = "http://localhost:8080/api/developer/insertComponent"; 
@@ -72,18 +75,43 @@ const addEmployeeComponent = async (employeeData) => {
   }
 };
   // Function to delete an employee
-const deleteEmployee = async (id, endDate) => {
+const deleteRole = async (id) => {
     try {
       const token = await getToken(); // ✅ Fix: Await getToken()
-      const response = await axios.post(Delete_API_URL, { id, endDate }, {
+      const response = await axios.post(API_URL_DELETE, id, {
         headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
       });
-      return response.data;
+      return response;
     } catch (error) {
       console.error("Error deleting employee:", error);
       throw error;
     }
   };
+  const updateRole = async (data) => {
+    try {
+      const token = await getToken(); // ✅ Fix: Await getToken()
+      const response = await axios.post(API_URL_Update, data, {
+        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
+      });
+      return response;
+    } catch (error) {
+      console.error("Error deleting employee:", error);
+      throw error;
+    }
+  };
+   // Function to delete an employee
+const deletePemission = async (data) => {
+  try {
+    const token = await getToken(); // ✅ Fix: Await getToken()
+    const response = await axios.post(API_URL_DELETE_Permission, data, {
+      headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting employee:", error);
+    throw error;
+  }
+};
   const getAllEmployees = async (status) => {
    
     try {
@@ -211,4 +239,4 @@ const getAllRoleDataByRole = async (status) => {
     throw error;
   }
 };
-  export {addEmployee,deleteEmployee,getAllUsers,getAllEmployees,addEmployeePage,addEmployeeComponent,getAllRole,saveRolesToDatabase,addAssignPermission,getAllRoleDataByRole};
+  export {addEmployee,deleteRole,getAllUsers,deletePemission ,updateRole,getAllEmployees,addEmployeePage,addEmployeeComponent,getAllRole,saveRolesToDatabase,addAssignPermission,getAllRoleDataByRole};

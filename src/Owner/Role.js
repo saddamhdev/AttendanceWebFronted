@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, Modal, Spinner, Collapse, Table } from "react-bootstrap";
-import { addEmployee, deleteEmployee, getAllEmployees,getAllRole } from "../services/rolePermissionService";
+import { addEmployee, updateRole, deleteRole, getAllRole } from "../services/rolePermissionService";
 import Navbar from "../layouts/Navbar";
-import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
+import { checkAccessComponent } from "../utils/accessControl";
+
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
   const [formData, setFormData] = useState({ roleName: "" });
+  const [editingData, setEditingData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
-  const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
     fetchEmployees();
@@ -19,8 +20,7 @@ const EmployeeManagement = () => {
 
   const fetchEmployees = async () => {
     try {
-      const response = await getAllRole("1"); // Fetch role data
-      console.log(response);  
+      const response = await getAllRole("1");
       setEmployees(
         response && Array.isArray(response)
           ? response.map(emp => ({ roleName: emp.roleName }))
@@ -37,13 +37,11 @@ const EmployeeManagement = () => {
   };
 
   const handleAdd = async (event) => {
-    event.preventDefault();  // Prevents unintended form submission
+    event.preventDefault();
     setLoading(true);
     try {
       const response = await addEmployee(formData);
-      console.log("New Employee Added:", response);
-
-      if (response.status === 200 && response.data) {
+      if (response.status === 200) {
         alert("Successfully Inserted");
         setFormData({ roleName: "" });
         setShowForm(false);
@@ -54,8 +52,36 @@ const EmployeeManagement = () => {
         alert("An unexpected error occurred.");
       }
     } catch (error) {
-      console.error("Error:", error);
       alert("Failed to add employee.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditClick = (employee) => {
+    setEditingData(employee);
+    setFormData({ roleName: employee.roleName }); 
+    setShowForm(true); 
+  };
+
+  const handleUpdate = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    
+    try {
+      const response = await updateRole({ oldRoleName: editingData.roleName, newRoleName: formData.roleName });
+
+      if (response.status === 200) {
+        alert("Successfully Updated");
+        setEditingData(null);
+        setFormData({ roleName: "" });
+        setShowForm(false);
+        await fetchEmployees();
+      } else {
+        alert(response.data || "Update failed.");
+      }
+    } catch (error) {
+      alert("Error updating role.");
     } finally {
       setLoading(false);
     }
@@ -67,22 +93,23 @@ const EmployeeManagement = () => {
   };
 
   const confirmDelete = async () => {
-    if (!endDate) {
-      alert("Please select an End Date before deleting.");
-      return;
-    }
     setLoadingDelete(selectedEmployee.roleName);
+    
     try {
-      await deleteEmployee(selectedEmployee.roleName, endDate);
-      setEmployees(prev => prev.filter(emp => emp.roleName !== selectedEmployee.roleName));
-      alert("Employee deleted successfully.");
+      const response = await deleteRole({ id: selectedEmployee.roleName });
+  
+      if (response.status === 200) {
+        alert(response.data);
+        setEmployees(prev => prev.filter(emp => emp.roleName !== selectedEmployee.roleName));
+      } else {
+        alert(response.data);
+      }
     } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to delete employee.");
+      alert(error.response?.data || "An error occurred while deleting the role.");
     } finally {
       setLoadingDelete(null);
       setShowModal(false);
-      setEndDate("");
+      setSelectedEmployee(null);
     }
   };
 
@@ -90,52 +117,44 @@ const EmployeeManagement = () => {
     <>
       <Navbar />
 
-      <div className="container mt-4" style={{ paddingTop: "100px" }}>
-        {checkAccessComponent("Owner","Role","Add") && (
-            <>
-            <Button
+      <div className="container mt-4 " style={{ paddingTop: "100px" }}>
+        {checkAccessComponent("Owner", "Role", "Add") && (
+          <Button
             variant="primary"
-            onClick={() => setShowForm(!showForm)}
+            onClick={() => { setShowForm(!showForm); setEditingData(null); setFormData({ roleName: "" }); }}
             aria-controls="employee-form-collapse"
             aria-expanded={showForm}
           >
-            {showForm ? "Hide Form" : "Add role Name"}
+            {showForm ? "Hide Form" : editingData ? "Edit Role" : "Add Role Name"}
           </Button>
-            </>
         )}
-        
 
         <Collapse in={showForm}>
           <div id="employee-form-collapse" className="mt-3">
-            <Form.Control
-              type="text"
-              name="roleName"
-              placeholder="role Name"
-              value={formData.roleName}
-              onChange={handleChange}
-              className="me-2 mb-2"
-            />
-            <Button onClick={handleAdd} disabled={loading}>
-              {loading ? <Spinner animation="border" size="sm" /> : "Submit"}
-            </Button>
+            <div className="d-flex align-items-center">
+              <Form.Control
+                type="text"
+                name="roleName"
+                placeholder="Role Name"
+                value={formData.roleName}
+                onChange={handleChange}
+                className="me-2"
+                style={{ width: "30%" }} // Reduced input width
+              />
+              <Button onClick={editingData ? handleUpdate : handleAdd} disabled={loading}>
+                {loading ? <Spinner animation="border" size="sm" /> : (editingData ? "Update" : "Add Role")}
+              </Button>
+            </div>
           </div>
         </Collapse>
 
-        <Table bordered hover responsive className="mt-4">
+
+        <Table bordered hover responsive className="mt-4"  style={{ width: "60%" }}>
           <thead>
             <tr>
               <th>Role Name</th>
-              {checkAccessComponent("Owner","Role","Edit") && (
-                    <>
-                    <th>Edit</th>
-                    </>
-                )}
-                {checkAccessComponent("Owner","Role","Delete") && (
-                    <>
-                    <th>Delete</th>
-                    </>
-                )}
-             
+              {checkAccessComponent("Owner", "Role", "Edit") && <th>Edit</th>}
+              {checkAccessComponent("Owner", "Role", "Delete") && <th>Delete</th>}
             </tr>
           </thead>
           <tbody>
@@ -146,38 +165,30 @@ const EmployeeManagement = () => {
             ) : (
               employees.map((employee, index) => (
                 <tr key={index} className="text-center">
-                 <td>{employee.roleName}</td>
-
-                 
-                  {checkAccessComponent("Owner","Role","Edit") && (
-                    <>
-                     <td>
-                        <Button variant="warning">Edit</Button>
-                      </td>
-                  
-
-                    </>
-                )}
-                {checkAccessComponent("Owner","Role","Delete") && (
-                    <>
-                   <td>
-                    <Button
-                      variant="danger"
-                      onClick={() => handleDeleteClick(employee)}
-                      disabled={loadingDelete === employee.roleName}
-                    >
-                      {loadingDelete === employee.roleName ? (
-                        <>
-                          <Spinner animation="border" size="sm" className="me-2" />
-                          Deleting...
-                        </>
-                      ) : (
-                        "Delete"
-                      )}
-                    </Button>
-                  </td>
-                    </>
-                )}
+                  <td>{employee.roleName}</td>
+                  {checkAccessComponent("Owner", "Role", "Edit") && (
+                    <td>
+                      <Button variant="warning" onClick={() => handleEditClick(employee)}>Edit</Button>
+                    </td>
+                  )}
+                  {checkAccessComponent("Owner", "Role", "Delete") && (
+                    <td>
+                      <Button
+                        variant="danger"
+                        onClick={() => handleDeleteClick(employee)}
+                        disabled={loadingDelete === employee.roleName}
+                      >
+                        {loadingDelete === employee.roleName ? (
+                          <>
+                            <Spinner animation="border" size="sm" className="me-2" />
+                            Deleting...
+                          </>
+                        ) : (
+                          "Delete"
+                        )}
+                      </Button>
+                    </td>
+                  )}
                 </tr>
               ))
             )}
@@ -190,11 +201,12 @@ const EmployeeManagement = () => {
           </Modal.Header>
           <Modal.Body>
             <p>Are you sure you want to delete <strong>{selectedEmployee?.roleName}</strong>?</p>
-            <Form.Control type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
-            <Button variant="danger" onClick={confirmDelete}>Delete</Button>
+            <Button variant="danger" onClick={confirmDelete} disabled={loadingDelete !== null}>
+              {loadingDelete !== null ? "Deleting..." : "Delete"}
+            </Button>
           </Modal.Footer>
         </Modal>
       </div>

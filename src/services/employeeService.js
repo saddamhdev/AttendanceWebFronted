@@ -1,6 +1,7 @@
 import axios from "axios";
 import {getToken} from "./Auth";
 const API_URL = "http://localhost:8080/api/user/insert"; 
+const Update_API_URL = "http://localhost:8080/api/user/update"; 
 const GET_API_URL = "http://localhost:8080/api/user/getAll";
 const Delete_API_URL = "http://localhost:8080/api/user/delete";
 const Login_API_URL = "http://localhost:8080/api/user/login";
@@ -21,6 +22,30 @@ const addEmployee = async (employeeData, size) => {
     const token = await getToken();  // ✅ Fix: Await getToken()
 
     const response = await axios.post(API_URL, updatedEmployeeData, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    return response;
+  } catch (error) {
+    console.error("Error adding employee:", error);
+    throw error;
+  }
+};
+
+// Function to add an employee
+const updateEmployee = async (employeeData, size,rowId) => {
+  try {
+    const updatedEmployeeData = {
+      ...employeeData,
+      status: "1", 
+      endDate: "",
+      position: size,
+      currentTimee: new Date().toISOString(),
+      rowId: rowId,
+    };
+
+    const token = await getToken();  // ✅ Fix: Await getToken()
+
+    const response = await axios.post(Update_API_URL, updatedEmployeeData, {
       headers: { "Authorization": `Bearer ${token}` }
     });
     return response;
@@ -78,4 +103,4 @@ const loginEmloyee = async (email, password) => {
 };
 
 
-export { addEmployee, getAllEmployees, deleteEmployee ,loginEmloyee};
+export { addEmployee, getAllEmployees, deleteEmployee ,loginEmloyee,updateEmployee};

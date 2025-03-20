@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { Table, Form, Button, Spinner,Modal,Collapse  } from "react-bootstrap";
 import Navbar from "../layouts/Navbar";
-import { addEmployee,getAllEmployees,deleteEmployee } from "../services/employeeService";
+import { addEmployee,getAllEmployees,deleteEmployee,updateEmployee } from "../services/employeeService";
 import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 
 const EmployeeTable = () => {
   const [showModal, setShowModal] = useState(false);
   const [employees, setEmployees] = useState([]);
+  const [isEditing, setIsEditing] = useState(false);
+const [editId, setEditId] = useState(null);
+
   const [formData, setFormData] = useState({ 
     idNumber: "", 
     name: "", 
@@ -14,7 +17,6 @@ const EmployeeTable = () => {
     joinDate: "", 
     email: "", 
     password: "",
-    type: "Employee" // Default type
   });
 
   const [showForm, setShowForm] = useState(false);
@@ -49,32 +51,62 @@ const EmployeeTable = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleAdd = async () => {
+  const handleSubmit = async () => {
     setLoading(true);
     try {
-        const response = await addEmployee(formData, employees.length + 1);
-      
-
+      if (isEditing) {
+        // Update existing employee
+        const response = await updateEmployee(formData,employees.length + 1,editId ); // Call update API
         if (response.status === 200) {
-            alert("Successfully Inserted");
-            setEmployees([...employees, formData]);
-            setFormData({ idNumber: "", name: "", designation: "", joinDate: "", email: "", password: "", type: "Employee" });
-           setShowForm(false);
-          } else if (response.status === 409) {
-            alert("Failed to Insert: Employee already exists.");
+          alert("Employee updated successfully.");
+          setEmployees((prevEmployees) =>
+            prevEmployees.map((emp) =>
+              emp.id === editId ? { ...formData, id: editId } : emp
+            )
+          );
+          window.location.reload();
         } else {
-            alert("An unexpected error occurred.");
+          alert("Failed to update employee.");
         }
-
+      } else {
+        // Add new employee
+        const response = await addEmployee(formData, employees.length + 1);
+        if (response.status === 200) {
+          alert("Employee added successfully.");
+          setEmployees([...employees, formData]);
+          window.location.reload();
+        } else {
+          alert("Failed to add employee.");
+        }
+      }
+      // Reset form and state
+      setFormData({ idNumber: "", name: "", designation: "", joinDate: "", email: "", password: "" });
+      setIsEditing(false);
+      setEditId(null);
+      setShowForm(false);
     } catch (error) {
-        console.error("Error:", error);
-        alert("Failed to add employee.");
+      console.error("Error:", error);
+      alert("Operation failed.");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
+  };
+  
+
+const handleEditClick = (employee) => {
+  setFormData({
+    idNumber: employee.idNumber,
+    name: employee.name,
+    designation: employee.designation,
+    joinDate: employee.joinDate,
+    email: employee.email,
+    password: employee.password,
+  });
+  setEditId(employee.id);
+  setIsEditing(true);
+  setShowForm(true); // Show form when editing
 };
 
- 
 
   const handleDeleteClick = (employee) => {
     setSelectedEmployee(employee);
@@ -91,12 +123,13 @@ const EmployeeTable = () => {
 
     try {
       // Here you can send the `endDate` to your backend if needed
-       await deleteEmployee(selectedEmployee.idNumber, endDate);
+     const response=  await deleteEmployee(selectedEmployee.id, endDate);
       setEmployees((prevEmployees) => prevEmployees.filter((emp) => emp.idNumber !== selectedEmployee.idNumber));
-      alert("Employee deleted successfully.");
+      alert(response);
+      window.location.reload();
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to delete employee.");
+      alert(error.message);
     } finally {
       setLoadingDelete(null);
       setShowModal(false);
@@ -132,24 +165,18 @@ const EmployeeTable = () => {
               <Form.Control type="password" name="password" placeholder="Password" value={formData.password} onChange={handleChange} className="me-2 mb-2" />
               <Form.Control type="text" name="designation" placeholder="Designation" value={formData.designation} onChange={handleChange} className="me-2 mb-2" />
               <Form.Control type="date" name="joinDate" value={formData.joinDate} onChange={handleChange} className="me-2 mb-2" />
-              {/* New Type Dropdown */}
-            <Form.Select name="type" value={formData.type} onChange={handleChange} className="me-2 mb-2">
-              <option value="Author">Author</option>
-              <option value="Admin">Admin</option>
-              <option value="Employee">Employee</option>
-            </Form.Select>
              
-             
-              <Button variant="success" onClick={handleAdd} className="mb-2 d-flex align-items-center" disabled={loading}>
+              <Button variant="success" onClick={handleSubmit} className="mb-2 d-flex align-items-center" disabled={loading}>
                 {loading ? (
                   <>
                     <Spinner animation="border" size="sm" className="me-2" />
-                    Adding...
+                    {isEditing ? "Updating..." : "Adding..."}
                   </>
                 ) : (
-                  "Add"
+                  isEditing ? "Update" : "Add"
                 )}
               </Button>
+
             </div>
           </div>
         </Collapse>
@@ -161,7 +188,6 @@ const EmployeeTable = () => {
               <th>Name</th>
               <th>Email</th>
               <th>Password</th>
-              <th>Type</th>
               <th>Join Date</th>
               <th>Designation</th>
               {checkAccessComponent("Employee","EmployeeList","Edit") && (
@@ -188,13 +214,17 @@ const EmployeeTable = () => {
                   <td>{employee.idNumber}</td>
                   <td>{employee.name}</td>
                   <td>{employee.email}</td>
-                  <td>{employee.password}</td>
-                  <td>{employee.type}</td>
+                  <td>{employee.password ? employee.password.substring(0, 10) : ""}</td>
                   <td>{employee.joinDate}</td>
                   <td>{employee.designation}</td>
                   {checkAccessComponent("Employee","EmployeeList","Edit") && (
                     <>
-                       <td><Button variant="warning">Edit</Button></td>
+                       <td>
+                        <Button variant="warning" onClick={() => handleEditClick(employee)}>
+                          Edit
+                        </Button>
+                      </td>
+
                     </>
                   )}
                   {checkAccessComponent("Employee","EmployeeList","Delete") && (

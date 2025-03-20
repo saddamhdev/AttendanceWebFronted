@@ -2,41 +2,45 @@ import React, { useEffect, useState } from "react";
 import { Table, Button, Form, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "../layouts/Navbar";
-import { addGlobalSettingData, getAllGlobalData ,deleteGlobalData} from "../services/globalSettingService";
-import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
+import { addGlobalSettingData, getAllGlobalData, updateGlobalData, deleteGlobalData } from "../services/globalSettingService";
+import { checkAccessComponent } from "../utils/accessControl";
 
 const DataTable = () => {
   const [rows, setRows] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedRowId, setSelectedRowId] = useState(null);
   const [newRow, setNewRow] = useState({
     formattedBirthDate: "",
     formattedDeathDate: "",
     lateMinute: 0,
     earlyMinute: 0,
   });
+
+  useEffect(() => {
+    fetchGlobalData();
+  }, []);
+
   const fetchGlobalData = async () => {
     try {
       const response = await getAllGlobalData();
-    
       setRows(response);
     } catch (error) {
       console.error("Error fetching global data:", error);
     }
   };
 
-  useEffect(() => {
-   
-    fetchGlobalData();
-  }, []);
-
   const handleNewButtonClick = () => {
+    setIsEditing(false);
+    setSelectedRowId(null);
+
     let startDate;
     if (rows.length > 0) {
       const firstRowDate = new Date(rows[0].formattedDeathDate);
       startDate = new Date(firstRowDate);
       startDate.setDate(startDate.getDate() + 1);
     } else {
-      startDate = new Date(); // Default to today if no rows exist
+      startDate = new Date();
     }
 
     const endDate = new Date(startDate);
@@ -52,13 +56,31 @@ const DataTable = () => {
     setShowModal(true);
   };
 
+  const handleEditClick = (row) => {
+    setIsEditing(true);
+    setSelectedRowId(row.id);
+    setNewRow({
+      formattedBirthDate: row.formattedBirthDate,
+      formattedDeathDate: row.formattedDeathDate,
+      lateMinute: row.lateMinute,
+      earlyMinute: row.earlyMinute,
+    });
+
+    setShowModal(true);
+  };
+
   const handleInputChange = (field, value) => {
     setNewRow({ ...newRow, [field]: value });
   };
 
   const handleSave = async () => {
     try {
-      await addGlobalSettingData(newRow);
+      if (isEditing) {
+        await updateGlobalData(selectedRowId, newRow);
+      } else {
+        await addGlobalSettingData(newRow);
+      }
+
       setShowModal(false);
       fetchGlobalData();
     } catch (error) {
@@ -66,41 +88,24 @@ const DataTable = () => {
     }
   };
 
-  const deleteRow = async (row,index) => {
-    setRows(rows.filter((_, i) => i !== index));
-    // Implement delete functionality here
+  const deleteRow = async (row, index) => {
     try {
-        const response = await deleteGlobalData(row);
-        fetchGlobalData();
-        alert(response.replace(/^"|"$/g, ''));
-
-
-        
-      } catch (error) {
-        console.error("Error fetching global data:", error);
-      }
+      await deleteGlobalData(row.id);
+      fetchGlobalData();
+    } catch (error) {
+      console.error("Error deleting global data:", error);
+    }
   };
 
   return (
     <>
       <Navbar />
       <div className="container mt-4" style={{ paddingTop: "100px" }}>
-            {checkAccessComponent("Setting","GlobalSetting","Add") && (
-              <>
-                <Button variant="primary" className="me-2" onClick={handleNewButtonClick}>
-                New
-              </Button>
-              </>
-            )}
-
-
-            {checkAccessComponent("Setting","GlobalSetting","History") && (
-              <>
-                 <Button variant="secondary">History</Button>
-              </>
-             )}
-        
-       
+        {checkAccessComponent("Setting", "GlobalSetting", "Add") && (
+          <Button variant="primary" className="me-2" onClick={handleNewButtonClick}>
+            New
+          </Button>
+        )}
 
         <Table bordered hover className="mt-3">
           <thead>
@@ -109,20 +114,8 @@ const DataTable = () => {
               <th>End Date</th>
               <th>Late Minute</th>
               <th>Early Minute</th>
-              {checkAccessComponent("Setting","GlobalSetting","Edit") && (
-              <>
-               <th>Edit</th>
-               
-              </>
-            )}
-
-            {checkAccessComponent("Setting","GlobalSetting","Delete") && (
-              <>
-              
-                 <th>Delete</th>
-              </>
-             )}
-              
+              {checkAccessComponent("Setting", "GlobalSetting", "Edit") && <th>Edit</th>}
+              {checkAccessComponent("Setting", "GlobalSetting", "Delete") && <th>Delete</th>}
             </tr>
           </thead>
           <tbody>
@@ -132,37 +125,25 @@ const DataTable = () => {
                 <td>{row.formattedDeathDate}</td>
                 <td>{row.lateMinute}</td>
                 <td>{row.earlyMinute}</td>
-                {checkAccessComponent("Setting","GlobalSetting","Edit") && (
-                    <>
-                   <td>
-                  <Button variant="warning">Edit</Button>
-                   </td>
-                    </>
-                  )}
-
-                  {checkAccessComponent("Setting","GlobalSetting","Delete") && (
-                    <>
-                    
-                    <td>
-                  <Button variant="danger" onClick={() => deleteRow(row,index)}>
-                    Delete
-                  </Button>
+                {checkAccessComponent("Setting", "GlobalSetting", "Edit") && (
+                  <td>
+                    <Button variant="warning" onClick={() => handleEditClick(row)}>Edit</Button>
                   </td>
-                    </>
-                  )}
-                    
-                
-                
+                )}
+                {checkAccessComponent("Setting", "GlobalSetting", "Delete") && (
+                  <td>
+                    <Button variant="danger" onClick={() => deleteRow(row, index)}>Delete</Button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
         </Table>
       </div>
 
-      {/* Modal for adding a new row */}
       <Modal show={showModal} onHide={() => setShowModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>Add New Entry</Modal.Title>
+          <Modal.Title>{isEditing ? "Edit Entry" : "Add New Entry"}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
@@ -205,7 +186,7 @@ const DataTable = () => {
             Cancel
           </Button>
           <Button variant="primary" onClick={handleSave}>
-            Save
+            {isEditing ? "Update" : "Save"}
           </Button>
         </Modal.Footer>
       </Modal>

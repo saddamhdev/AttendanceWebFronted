@@ -55,7 +55,7 @@ const checkAndRefreshToken = async () => {
 
               localStorage.setItem("authToken", response.data.accessToken);
               localStorage.setItem("roleData", response.data.Role);
-              sessionStorage.setItem("expiry", Date.now() + 2 * 60 * 1000); // Extend session
+              sessionStorage.setItem("expiry", Date.now() + 10 * 60 * 1000); // Extend session
               
           } else {
               console.error("Refresh failed: No access token received.");

@@ -43,22 +43,41 @@ const RoleManagement = () => {
     }
   };
 
-  // Handle checkbox change for permissions
-  const handleCheckboxChange = (path, children) => {
+  const handleCheckboxChange = (path, children, parent) => {
     setSelectedRoles((prev) => {
       const isChecked = !prev[path]; // Toggle the current checkbox state
       const updatedRoles = { ...prev, [path]: isChecked };
-
-      // If unchecking a parent, remove all child selections
-      if (!isChecked) {
+  
+      if (isChecked) {
+        // If selecting, ensure all children are selected
+        children.forEach((child) => {
+          updatedRoles[child] = true;
+        });
+      } else {
+        // If unchecking, remove all child selections
         children.forEach((child) => {
           delete updatedRoles[child];
         });
       }
-
+  
+      // Handle parent color change if a child is unchecked
+      if (parent) {
+        const siblings = Object.keys(prev).filter((key) => key.startsWith(parent + "."));
+        const isAnySiblingChecked = siblings.some((sibling) => updatedRoles[sibling]);
+  
+        if (!isAnySiblingChecked) {
+          updatedRoles[parent] = "unselected"; // Change parent state to trigger color change
+        } else {
+          updatedRoles[parent] = true; // Keep parent selected if at least one child is checked
+        }
+      }
+  
       return updatedRoles;
     });
   };
+  
+  
+  
 
   // Save selected roles and permissions to the database
   const savePermissions = async () => {
@@ -132,16 +151,14 @@ const RoleManagement = () => {
       <Navbar />
       <div className="container mt-4" style={{ paddingTop: "100px" }}>
         <h2>Permission Management</h2>
-
+  
         <div className="form-group mt-4 mb-4">
           <label htmlFor="roleSelect">Select Role:</label>
           <select
             id="roleSelect"
             className="form-control"
             value={selectedRole}
-            onChange={(e) => {
-              roleChangeHandler(e);
-            }}
+            onChange={(e) => roleChangeHandler(e)}
           >
             <option value="">--Select a Role--</option>
             {roleData.map((role) => (
@@ -151,7 +168,7 @@ const RoleManagement = () => {
             ))}
           </select>
         </div>
-
+  
         {developerData.length === 0 ? (
           <p>Loading developer data...</p>
         ) : (
@@ -161,50 +178,63 @@ const RoleManagement = () => {
               `${menuPath}.${page.pageName}`,
               ...(page.components || []).map((comp) => `${menuPath}.${page.pageName}.${comp.componentName}`),
             ]);
-
+  
+            // Check if any child is unchecked
+            const isMenuPartiallyUnchecked = menuChildren.some(child => !selectedRoles[child]);
+  
             return (
               <div
                 key={menu.id || menuPath}
+                className={`menu-box ${isMenuPartiallyUnchecked ? "partially-unselected" : ""}`}
                 style={{ border: "1px solid black", padding: "10px", marginBottom: "10px" }}
               >
                 {/* Menu Level */}
                 <label>
                   <input
                     type="checkbox"
+                    style={{marginRight:"10px"}}
                     checked={!!selectedRoles[menuPath]}
                     onChange={() => handleCheckboxChange(menuPath, menuChildren)}
                   />
-                  <b>{menu.menuName}</b>
+                  <b  >{menu.menuName}</b>
                 </label>
-
+  
                 <div style={{ marginLeft: "20px" }}>
                   {(menu.pages || []).map((page, pIndex) => {
                     const pagePath = `${menu.menuName}.${page.pageName}`;
                     const pageChildren = (page.components || []).map((comp) => `${pagePath}.${comp.componentName}`);
-
+  
+                    // Check if any child is unchecked at the page level
+                    const isPagePartiallyUnchecked = pageChildren.some(child => !selectedRoles[child]);
+  
                     return (
-                      <div key={page.id || `${menuPath}-${pIndex}`}>
+                      <div
+                        key={page.id || `${menuPath}-${pIndex}`}
+                        className={`page-box ${isPagePartiallyUnchecked ? "partially-unselected" : ""}`}
+                      >
                         {/* Page Level */}
                         <label>
                           <input
                             type="checkbox"
                             checked={!!selectedRoles[pagePath]}
+                            style={{marginRight:"10px"}}
                             onChange={() => handleCheckboxChange(pagePath, pageChildren)}
                           />
                           {page.pageName}
                         </label>
-
+  
                         {/* Component Level */}
                         {page.components && (
                           <div style={{ marginLeft: "20px" }}>
                             {(page.components || []).map((component, cIndex) => {
                               const componentPath = `${pagePath}.${component.componentName}`;
-
+  
                               return (
                                 <div key={component.id || `${pagePath}-${cIndex}`}>
                                   <label>
                                     <input
                                       type="checkbox"
+                                      style={{marginRight:"10px"}}
                                       checked={!!selectedRoles[componentPath]}
                                       onChange={() => handleCheckboxChange(componentPath, [])} // No children at component level
                                     />
@@ -223,23 +253,21 @@ const RoleManagement = () => {
             );
           })
         )}
-
+  
         {/* Save button to send selected roles to the database */}
-        {checkAccessComponent("Owner","Permission","Save or Update") && (
-            <>
-              <button onClick={savePermissions} className="btn btn-primary mt-4">
-                Save/Update Permissions
-              </button>
-
-            </>
+        {checkAccessComponent("Owner", "Permission", "Save or Update") && (
+          <>
+            <button onClick={savePermissions} className="btn btn-primary mt-4">
+              Save/Update Permissions
+            </button>
+          </>
         )}
-               
-       
+  
         <h3>Selected Permissions:</h3>
         <pre>{JSON.stringify(selectedRoles, null, 2)}</pre>
       </div>
     </>
   );
-};
+}
 
 export default RoleManagement;

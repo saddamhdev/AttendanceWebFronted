@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, Modal, Spinner, Collapse, Table } from "react-bootstrap";
-import {addAssignPermission, addEmployee,deleteEmployee,getAllUsers,getAllEmployees,addEmployeePage,addEmployeeComponent,getAllRole,saveRolesToDatabase } from "../services/rolePermissionService";
+import {addAssignPermission, addEmployee,deletePemission ,getAllUsers,getAllEmployees,addEmployeePage,addEmployeeComponent,getAllRole,saveRolesToDatabase } from "../services/rolePermissionService";
 import Navbar from "../layouts/Navbar";
 import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
 const EmployeeManagement = () => {
@@ -16,7 +16,7 @@ const EmployeeManagement = () => {
   const [selectedUser, setSelectedUser] = useState("");
   const [roleData, setRoleData] = useState([]); // State for role data from DB
    const [selectedRole, setSelectedRole] = useState(""); // Store the selected role
-
+   const [employeeRoles, setEmployeeRoles] = useState([]); // Store assigned roles
   useEffect(() => {
     fetchEmployees();
     fetchUsers();   // ✅ Fetch users when the component mounts
@@ -87,6 +87,7 @@ const EmployeeManagement = () => {
   
         setFormData({ userName: "", roleName: "" });
         setShowForm(false);
+        window.location.reload();
       } else if (response.status === 409) {
         alert("Failed to Insert: Role already exists.");
       } else {
@@ -103,28 +104,49 @@ const EmployeeManagement = () => {
 
   const handleDeleteClick = (employee) => {
     setSelectedEmployee(employee);
+    setSelectedRole(""); // Reset role selection
+  
+    // Ensure employee has assigned roles before setting
+    if (employee.type && Array.isArray(employee.type)) {
+      setEmployeeRoles(employee.type); // Set roles dynamically
+    } else {
+      setEmployeeRoles([]); // Default empty if no roles assigned
+    }
+  
     setShowModal(true);
   };
-
+  
   const confirmDelete = async () => {
-    if (!endDate) {
-      alert("Please select an End Date before deleting.");
+    if (!selectedRole) {
+      alert("Please select a role before removing.");
       return;
     }
+  
     setLoadingDelete(selectedEmployee.id);
     try {
-      await deleteEmployee(selectedEmployee.id, endDate);
-      setEmployees(prev => prev.filter(emp => emp.id !== selectedEmployee.id)); // Fix delete function
-      alert("Employee deleted successfully.");
+      await deletePemission ({id:selectedEmployee.id, roleName:selectedRole}); // Send only assigned role
+      alert("Employee role removed successfully.");
+  
+      // Update local state: Remove only the selected role
+      setEmployees(prev =>
+        prev.map(emp =>
+          emp.id === selectedEmployee.id
+            ? { ...emp, type: emp.type.filter(role => role !== selectedRole) }
+            : emp
+        )
+      );
+      window.location.reload();
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to delete employee.");
+      alert("Failed to remove employee role.");
     } finally {
       setLoadingDelete(null);
       setShowModal(false);
-      setEndDate("");
+      setSelectedRole(""); // Reset selection
     }
   };
+  
+  
 
   const handleUserChange = (e) => {
     setSelectedUser(e.target.value);
@@ -193,16 +215,11 @@ const EmployeeManagement = () => {
             <tr>
               <th>User Name</th>
               <th>Role Name</th>
-              {checkAccessComponent("Owner","Assign Permission","Edit") && (
-                   <>
-                    <th>Edit</th>
-       
-                   </>
-               )}
+             
        
              {checkAccessComponent("Owner","Assign Permission","Delete") && (
                    <>
-                    <th>Delete</th>
+                    <th>Action</th>
        
                    </>
                )}
@@ -225,18 +242,6 @@ const EmployeeManagement = () => {
                         : "No role"}
                     </td>
 
-                  
-                 
-
-                  {checkAccessComponent("Owner","Assign Permission","Edit") && (
-                   <>
-                   <td>
-                    <Button variant="warning">Edit</Button>
-                  </td>
-       
-                   </>
-               )}
-       
                  {checkAccessComponent("Owner","Assign Permission","Delete") && (
                    <>
                      <td>
@@ -251,7 +256,7 @@ const EmployeeManagement = () => {
                           Deleting...
                         </>
                       ) : (
-                        "Delete"
+                        "Remove"
                       )}
                     </Button>
                   </td>
@@ -265,18 +270,41 @@ const EmployeeManagement = () => {
         </Table>
 
         <Modal show={showModal} onHide={() => setShowModal(false)}>
-          <Modal.Header closeButton>
-            <Modal.Title>Confirm Deletion</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            <p>Are you sure you want to delete <strong>{selectedEmployee?.menuName}</strong>?</p>
-            <Form.Control type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
-            <Button variant="danger" onClick={confirmDelete}>Delete</Button>
-          </Modal.Footer>
-        </Modal>
+            <Modal.Header closeButton>
+              <Modal.Title>Confirm Role Removal</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <p>Are you sure you want to remove a role from <strong>{selectedEmployee?.userName}</strong>?</p>
+
+              {/* Dropdown with only assigned roles */}
+              <Form.Select 
+                value={selectedRole} 
+                onChange={(e) => setSelectedRole(e.target.value)}
+              >
+                <option value="">-- Select a Role to Remove --</option>
+                {employeeRoles.map((role, index) => (
+                  <option key={index} value={role}>
+                    {role}
+                  </option>
+                ))}
+              </Form.Select>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
+              <Button variant="danger" onClick={confirmDelete} disabled={!selectedRole}>
+                {loadingDelete === selectedEmployee?.id ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    Removing...
+                  </>
+                ) : (
+                  "Remove"
+                )}
+              </Button>
+            </Modal.Footer>
+          </Modal>
+
+
       </div>
     </>
   );
