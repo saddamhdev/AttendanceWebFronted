@@ -4,6 +4,7 @@ import {getToken} from "./Auth";
 const API_URL = "http://localhost:8181/api/localSetting/insert"; 
 const GET_API_URL = "http://localhost:8181/api/localSetting/getAll"; 
 const DELETE_API_URL = "http://localhost:8181/api/localSetting/delete"; 
+const Update_API_URL = "http://localhost:8181/api/localSetting/update";
 
 
 
@@ -53,6 +54,19 @@ const getAllLocalData = async (status) => {
   }
 };
 
+const updateLocalSettingData = async (row) => {
+  try {
+    const response = await axios.post(Update_API_URL, row, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 const deleteLocalData = async (row) => {
   try {
     const response = await axios.delete(DELETE_API_URL, {
@@ -68,4 +82,6 @@ const deleteLocalData = async (row) => {
   }
 };
 
-export { addLocalSettingData, getAllLocalData, deleteLocalData };
+
+
+export { addLocalSettingData, getAllLocalData, deleteLocalData,updateLocalSettingData };

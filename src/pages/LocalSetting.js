@@ -2,25 +2,22 @@ import React, { useEffect, useState } from "react";
 import { Table, Button, Form, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "../layouts/Navbar";
-import { addLocalSettingData,getAllLocalData ,deleteLocalData} from "../services/LocalSettingService";
+import { addLocalSettingData, getAllLocalData, deleteLocalData, updateLocalSettingData} from "../services/LocalSettingService";
 import { getAllEmployees } from "../services/employeeService";
-import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
-
+import { checkAccessComponent } from "../utils/accessControl";
 
 const DataTable = () => {
-    const[selectedParson,setSelectedParson]=useState();
-    const[selectedId,setSelectedId]=useState();
-  const [employees, setEmployees] = useState([ 
-  ]);
+  const [selectedParson, setSelectedParson] = useState();
+  const [selectedId, setSelectedId] = useState();
+  const [employees, setEmployees] = useState([]);
   const [rows, setRows] = useState([]);
-
-
   const [user, setUser] = useState([]);
-
   const [showModal, setShowModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // Flag to check if we're editing
+  const [editRow, setEditRow] = useState({}); // To hold the row data being edited
   const [newRow, setNewRow] = useState({
     employeeId: "",
-    name: "", 
+    name: "",
     formattedBirthDate: "",
     formattedDeathDate: "",
     startHours: 0,
@@ -30,27 +27,22 @@ const DataTable = () => {
     totalHours: 0,
     designation: ""
   });
+
   const fetchLocalData = async () => {
     try {
       const response = await getAllLocalData();
-     
-
       setRows(response);
 
-    const  response1 = await getAllEmployees("1");
-      
+      const response1 = await getAllEmployees("1");
       setUser(response1);
       setSelectedId(response1[0].idNumber);
       setSelectedParson(response1[0].name);
-
-
     } catch (error) {
       console.error("Error fetching global data:", error);
     }
   };
 
   useEffect(() => {
-   
     fetchLocalData();
   }, []);
 
@@ -80,6 +72,25 @@ const DataTable = () => {
       designation: ""
     });
 
+    setIsEditing(false); // Not editing, so it's for creating new row
+    setShowModal(true);
+  };
+
+  const handleEditButtonClick = (row) => {
+    setEditRow(row);
+    setNewRow({
+      id: row.id, // Store the row ID
+      ...row,
+      formattedBirthDate: row.formattedBirthDate,
+      formattedDeathDate: row.formattedDeathDate,
+      startHours: row.startHours,
+      startMinute: row.startMinute,
+      endHours: row.endHours,
+      endMinute: row.endMinute,
+      totalHours: row.totalHours,
+      designation: row.designation
+    });
+    setIsEditing(true); // Flag to show it's an edit operation
     setShowModal(true);
   };
 
@@ -89,28 +100,54 @@ const DataTable = () => {
 
   const handleSave = async () => {
     try {
-      await addLocalSettingData(newRow);
+      if (isEditing) {
+        // Ensure newRow has an ID before updating
+        if (!newRow.id) {
+          alert("Error: Missing ID for updating the row.");
+          return;
+        }
+        console.log("Editing Row:", newRow);
+        
+        const response = await updateLocalSettingData(newRow);
+        
+        if (response.status === 200) {
+          alert("Successfully updated!");
+        } else {
+          alert(`Update failed: ${response.statusText}`);
+        }
+      } else {
+        // Add new row
+        const response = await addLocalSettingData(newRow);
+
+        if (response.ok) {
+          alert("Successfully added!");
+        } else {
+          const errorMessage = await response.text(); // Get detailed error message
+          alert(`Add failed: ${response.status} - ${errorMessage}`);
+        }
+
+      }
+      
       setShowModal(false);
-      fetchLocalData();
+      fetchLocalData(); // Refresh data after update/add
     } catch (error) {
       console.error("Failed to save entry:", error);
+      alert("An error occurred while saving. Please try again.");
+    }
+  };
+  
+
+  const deleteRow = async (row, index) => {
+    setRows(rows.filter((_, i) => i !== index));
+    try {
+      const response = await deleteLocalData(row);
+      fetchLocalData();
+      alert(response.replace(/^"|"$/g, ""));
+    } catch (error) {
+      console.error("Error fetching global data:", error);
     }
   };
 
-  const deleteRow = async (row,index) => {
-    setRows(rows.filter((_, i) => i !== index));
-    // Implement delete functionality here
-    try {
-        const response = await deleteLocalData(row);
-        fetchLocalData();
-        alert(response.replace(/^"|"$/g, ''));
-
-
-        
-      } catch (error) {
-        console.error("Error fetching global data:", error);
-      }
-  };
   const handleUserChange = (e) => {
     setSelectedParson(e.target.value);
     const selectedUser = user.find((us) => us.name === e.target.value);
@@ -121,36 +158,23 @@ const DataTable = () => {
     <>
       <Navbar />
       <div className="container mt-4" style={{ paddingTop: "100px" }}>
-        
-      <div className="d-flex align-items-center me-2" style={{ width: "30%" }}>
-        <Form.Select value={selectedParson} className="me-2" onChange={(e) => handleUserChange(e)}>
-          {
-            user.map((us, index) => (
+        <div className="d-flex align-items-center me-2" style={{ width: "30%" }}>
+          <Form.Select value={selectedParson} className="me-2" onChange={(e) => handleUserChange(e)}>
+            {user.map((us, index) => (
               <option key={index}>{us.name}</option>
-            ))
-          }
-        </Form.Select>
+            ))}
+          </Form.Select>
 
-       
-        
-       
-          {checkAccessComponent("User","LocalSetting","Add") && (
-              <>
-                <Button variant="primary" className="me-2" onClick={handleNewButtonClick}>
-                New
-              </Button>
-              </>
-            )}
+          {checkAccessComponent("User", "LocalSetting", "Add") && (
+            <Button variant="primary" className="me-2" onClick={handleNewButtonClick}>
+              New
+            </Button>
+          )}
 
-
-            {checkAccessComponent("User","LocalSetting","History") && (
-              <>
-                 <Button variant="secondary">History</Button>
-              </>
-             )}
-
-      </div>
-
+          {checkAccessComponent("User", "LocalSetting", "History") && (
+            <Button variant="secondary">History</Button>
+          )}
+        </div>
 
         <Table bordered hover className="mt-3">
           <thead>
@@ -163,25 +187,12 @@ const DataTable = () => {
               <th>End Minute</th>
               <th>Total Hours</th>
               <th>Designation</th>
-             
-              {checkAccessComponent("User","LocalSetting","Edit") && (
-              <>
-                 <th>Edit</th>
-               
-              </>
-            )}
-
-
-            {checkAccessComponent("User","LocalSetting","Delete") && (
-              <>
-                  
-                  <th>Delete</th>
-              </>
-             )}
+              {checkAccessComponent("User", "LocalSetting", "Edit") && <th>Edit</th>}
+              {checkAccessComponent("User", "LocalSetting", "Delete") && <th>Delete</th>}
             </tr>
           </thead>
           <tbody>
-            {rows.filter(row => row.employeeId === selectedId).map((row, index) => (
+            {rows.filter((row) => row.employeeId === selectedId).map((row, index) => (
               <tr key={index}>
                 <td>{row.formattedBirthDate}</td>
                 <td>{row.formattedDeathDate}</td>
@@ -191,117 +202,144 @@ const DataTable = () => {
                 <td>{row.endMinute}</td>
                 <td>{row.totalHours}</td>
                 <td>{row.designation}</td>
-                
-               
-                {checkAccessComponent("User","LocalSetting","Edit") && (
-                      <>
-                       <td>
-                        <Button variant="warning">Edit</Button>
-                      </td>
-                      </>
-                    )}
 
+                {checkAccessComponent("User", "LocalSetting", "Edit") && (
+                  <td>
+                    <Button variant="warning" onClick={() => handleEditButtonClick(row)}>
+                      Edit
+                    </Button>
+                  </td>
+                )}
 
-                    {checkAccessComponent("User","LocalSetting","Delete") && (
-                      <>
-                        <td>
-                          <Button variant="danger" onClick={() => deleteRow(row,index)}>
-                            Delete
-                          </Button>
-                        </td>
-                      </>
-                    )}
-
+                {checkAccessComponent("User", "LocalSetting", "Delete") && (
+                  <td>
+                    <Button variant="danger" onClick={() => deleteRow(row, index)}>
+                      Delete
+                    </Button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
         </Table>
       </div>
 
-      {/* Modal for adding a new row */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Add New Entry</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form>
+    {/* Modal for adding or editing a row */}
+<Modal show={showModal} onHide={() => setShowModal(false)} centered>
+  <Modal.Header closeButton>
+    <Modal.Title>{isEditing ? "Edit Entry" : "Add New Entry"}</Modal.Title>
+  </Modal.Header>
+  <Modal.Body>
+    <Form>
+      
+      {/* Hidden field for ID (Only used in edit mode) */}
+      {isEditing && (
+        <Form.Group controlId="rowId">
+          <Form.Control type="hidden" value={newRow.id} />
+        </Form.Group>
+      )}
+      {/* Employee Name */}
+      <Form.Group controlId="employeeId">
+        <Form.Label>Employee Name</Form.Label>
+        <Form.Control
+          type="text"
+          value={newRow.name}
+          onChange={(e) => handleInputChange("name", e.target.value)}
+          disabled={isEditing} // Disable editing the employee name when editing
+        />
+      </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Start Date</Form.Label>
-              <Form.Control
-                type="date"
-                value={newRow.formattedBirthDate}
-                onChange={(e) => handleInputChange("formattedBirthDate", e.target.value)}
-              />
-            </Form.Group>
+      {/* Start Date */}
+      <Form.Group controlId="formattedBirthDate">
+        <Form.Label>Start Date</Form.Label>
+        <Form.Control
+          type="date"
+          value={newRow.formattedBirthDate}
+          onChange={(e) => handleInputChange("formattedBirthDate", e.target.value)}
+        />
+      </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>End Date</Form.Label>
-              <Form.Control
-                type="date"
-                value={newRow.formattedDeathDate}
-                onChange={(e) => handleInputChange("formattedDeathDate", e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Start Hours</Form.Label>
-              <Form.Control
-                type="number"
-                value={newRow.startHours}
-                onChange={(e) => handleInputChange("startHours", e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Start Minute</Form.Label>
-              <Form.Control
-                type="number"
-                value={newRow.startMinute}
-                onChange={(e) => handleInputChange("startMinute", e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>End Hours</Form.Label>
-              <Form.Control
-                type="number"
-                value={newRow.endHours}
-                onChange={(e) => handleInputChange("endHours", e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>End Minute</Form.Label>
-              <Form.Control
-                type="number"
-                value={newRow.endMinute}
-                onChange={(e) => handleInputChange("endMinute", e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Total Hours</Form.Label>
-              <Form.Control
-                type="number"
-                value={newRow.totalHours}
-                onChange={(e) => handleInputChange("totalHours", e.target.value)}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Designation</Form.Label>
-              <Form.Control
-                type="text"
-                value={newRow.designation}
-                onChange={(e) => handleInputChange("designation", e.target.value)}
-              />
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleSave}>
-            Save
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      {/* End Date */}
+      <Form.Group controlId="formattedDeathDate">
+        <Form.Label>End Date</Form.Label>
+        <Form.Control
+          type="date"
+          value={newRow.formattedDeathDate}
+          onChange={(e) => handleInputChange("formattedDeathDate", e.target.value)}
+        />
+      </Form.Group>
+
+      {/* Start Hours */}
+      <Form.Group controlId="startHours">
+        <Form.Label>Start Hours</Form.Label>
+        <Form.Control
+          type="number"
+          value={newRow.startHours}
+          onChange={(e) => handleInputChange("startHours", e.target.value)}
+        />
+      </Form.Group>
+
+      {/* Start Minutes */}
+      <Form.Group controlId="startMinute">
+        <Form.Label>Start Minute</Form.Label>
+        <Form.Control
+          type="number"
+          value={newRow.startMinute}
+          onChange={(e) => handleInputChange("startMinute", e.target.value)}
+        />
+      </Form.Group>
+
+      {/* End Hours */}
+      <Form.Group controlId="endHours">
+        <Form.Label>End Hours</Form.Label>
+        <Form.Control
+          type="number"
+          value={newRow.endHours}
+          onChange={(e) => handleInputChange("endHours", e.target.value)}
+        />
+      </Form.Group>
+
+      {/* End Minutes */}
+      <Form.Group controlId="endMinute">
+        <Form.Label>End Minute</Form.Label>
+        <Form.Control
+          type="number"
+          value={newRow.endMinute}
+          onChange={(e) => handleInputChange("endMinute", e.target.value)}
+        />
+      </Form.Group>
+
+      {/* Total Hours */}
+      <Form.Group controlId="totalHours">
+        <Form.Label>Total Hours</Form.Label>
+        <Form.Control
+          type="number"
+          value={newRow.totalHours}
+          onChange={(e) => handleInputChange("totalHours", e.target.value)}
+        />
+      </Form.Group>
+
+      {/* Designation */}
+      <Form.Group controlId="designation">
+        <Form.Label>Designation</Form.Label>
+        <Form.Control
+          type="text"
+          value={newRow.designation}
+          onChange={(e) => handleInputChange("designation", e.target.value)}
+        />
+      </Form.Group>
+    </Form>
+  </Modal.Body>
+  <Modal.Footer>
+    <Button variant="secondary" onClick={() => setShowModal(false)}>
+      Cancel
+    </Button>
+    <Button variant="primary" onClick={handleSave}>
+      Save
+    </Button>
+  </Modal.Footer>
+</Modal>
+
     </>
   );
 };
