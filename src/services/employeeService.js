@@ -139,7 +139,7 @@ const deleteEmployee = async (id, endDate) => {
   }
 };
 
-const loginEmloyee = async (email, password) => {
+const loginEmloyee = async (email, password,handleError) => {
   try {
     const response = await axios.post(Login_API_URL, { email, password }, {
       headers: { "Content-Type": "application/json" }
@@ -172,8 +172,8 @@ const loginEmloyee = async (email, password) => {
       errorMessage = `⚠️ Request error: ${error.message}`;
     }
 
-    alert(errorMessage); // Show error message to user
-   
+   // alert(errorMessage); // Show error message to user
+    handleError(errorMessage|| "Something went wrong. Please try again.");
 
     throw error; // Rethrow for handling in calling function
   }
