@@ -57,27 +57,17 @@ const [editId, setEditId] = useState(null);
       if (isEditing) {
         // Update existing employee
         const response = await updateEmployee(formData,employees.length + 1,editId ); // Call update API
-        if (response.status === 200) {
-          alert("Employee updated successfully.");
-          setEmployees((prevEmployees) =>
-            prevEmployees.map((emp) =>
-              emp.id === editId ? { ...formData, id: editId } : emp
-            )
-          );
-          window.location.reload();
-        } else {
-          alert("Failed to update employee.");
-        }
+        setEmployees((prevEmployees) =>
+          prevEmployees.map((emp) =>
+            emp.id === editId ? { ...formData, id: editId } : emp
+          )
+        );
+        window.location.reload();
       } else {
         // Add new employee
         const response = await addEmployee(formData, employees.length + 1);
-        if (response.status === 200) {
-          alert("Employee added successfully.");
-          setEmployees([...employees, formData]);
-          window.location.reload();
-        } else {
-          alert("Failed to add employee.");
-        }
+        setEmployees([...employees, formData]);
+         window.location.reload();
       }
       // Reset form and state
       setFormData({ idNumber: "", name: "", designation: "", joinDate: "", email: "", password: "" });
@@ -86,7 +76,7 @@ const [editId, setEditId] = useState(null);
       setShowForm(false);
     } catch (error) {
       console.error("Error:", error);
-      alert("Operation failed.");
+      window.location.reload();
     } finally {
       setLoading(false);
     }
@@ -125,11 +115,11 @@ const handleEditClick = (employee) => {
       // Here you can send the `endDate` to your backend if needed
      const response=  await deleteEmployee(selectedEmployee.id, endDate);
       setEmployees((prevEmployees) => prevEmployees.filter((emp) => emp.idNumber !== selectedEmployee.idNumber));
-      alert(response);
+     
       window.location.reload();
     } catch (error) {
       console.error("Error:", error);
-      alert(error.message);
+      
     } finally {
       setLoadingDelete(null);
       setShowModal(false);

@@ -89,16 +89,12 @@ const RoleManagement = () => {
     try {
       // Call the save API service to send selectedRoles to the database
       const response = await saveRolesToDatabase(selectedRole, selectedRoles);
-      if (response.status === 200 && response.data) {
-        alert("Permissions saved successfully!");
-      } else {
-        alert("Failed to save permissions.");
-      }
+     
       window.location.reload(); // ✅ Reload to trigger useEffect in `App.js`
 
     } catch (error) {
       console.error("Error saving permissions:", error);
-      alert("Error saving permissions.");
+      window.location.reload(); // ✅ Reload to trigger useEffect in `App.js`
     }
   };
 

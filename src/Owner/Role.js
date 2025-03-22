@@ -39,24 +39,17 @@ const EmployeeManagement = () => {
   const handleAdd = async (event) => {
     event.preventDefault();
     setLoading(true);
+  
     try {
       const response = await addEmployee(formData);
-      if (response.status === 200) {
-        alert("Successfully Inserted");
-        setFormData({ roleName: "" });
-        setShowForm(false);
-        await fetchEmployees();
-      } else if (response.status === 409) {
-        alert("Failed to Insert: Employee already exists.");
-      } else {
-        alert("An unexpected error occurred.");
-      }
+      window.location.reload();
     } catch (error) {
-      alert("Failed to add employee.");
+      console.log(`Failed to add role. Error: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
+  
 
   const handleEditClick = (employee) => {
     setEditingData(employee);
@@ -67,25 +60,25 @@ const EmployeeManagement = () => {
   const handleUpdate = async (event) => {
     event.preventDefault();
     setLoading(true);
-    
-    try {
-      const response = await updateRole({ oldRoleName: editingData.roleName, newRoleName: formData.roleName });
 
-      if (response.status === 200) {
-        alert("Successfully Updated");
+    try {
+        const response = await updateRole({
+            oldRoleName: editingData.roleName,
+            newRoleName: formData.roleName
+        });
+
         setEditingData(null);
         setFormData({ roleName: "" });
         setShowForm(false);
         await fetchEmployees();
-      } else {
-        alert(response.data || "Update failed.");
-      }
     } catch (error) {
-      alert("Error updating role.");
+        console.error("Update error:", error); // Debugging
+       // alert("Error updating role.");
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
+
 
   const handleDeleteClick = (employee) => {
     setSelectedEmployee(employee);
@@ -97,15 +90,9 @@ const EmployeeManagement = () => {
     
     try {
       const response = await deleteRole({ id: selectedEmployee.roleName });
-  
-      if (response.status === 200) {
-        alert(response.data);
-        setEmployees(prev => prev.filter(emp => emp.roleName !== selectedEmployee.roleName));
-      } else {
-        alert(response.data);
-      }
+      setEmployees(prev => prev.filter(emp => emp.roleName !== selectedEmployee.roleName));
     } catch (error) {
-      alert(error.response?.data || "An error occurred while deleting the role.");
+      console.log(error.response?.data || "An error occurred while deleting the role.");
     } finally {
       setLoadingDelete(null);
       setShowModal(false);

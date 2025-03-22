@@ -1,10 +1,12 @@
 import axios from "axios";
 import {getToken} from "./Auth";
+
 const API_URL = "http://localhost:8080/api/user/insert"; 
 const Update_API_URL = "http://localhost:8080/api/user/update"; 
 const GET_API_URL = "http://localhost:8080/api/user/getAll";
 const Delete_API_URL = "http://localhost:8080/api/user/delete";
 const Login_API_URL = "http://localhost:8080/api/user/login";
+
 // Fetch the token from the backend
 
 
@@ -24,9 +26,25 @@ const addEmployee = async (employeeData, size) => {
     const response = await axios.post(API_URL, updatedEmployeeData, {
       headers: { "Authorization": `Bearer ${token}` }
     });
+    alert(response.data);
     return response;
-  } catch (error) {
-    console.error("Error adding employee:", error);
+  }catch (error) {
+    // Log full error to see what went wrong
+    if (error.response) {
+      // Backend responded with a status code outside the 2xx range
+      console.error("Backend error response:", error.response);
+      alert(`❌ error: ${error.response.data || error.response.statusText}`);
+    } else if (error.request) {
+      // Request was made but no response was received
+      console.error("No response received from backend:", error.request);
+      alert("Network error: No response from server.");
+    } else {
+      // Something went wrong in setting up the request
+      console.error("Request setup error:", error.message);
+      alert(`Error: ${error.message}`);
+    }
+
+    // Rethrow the error so it can be handled by the calling code
     throw error;
   }
 };
@@ -48,9 +66,25 @@ const updateEmployee = async (employeeData, size,rowId) => {
     const response = await axios.post(Update_API_URL, updatedEmployeeData, {
       headers: { "Authorization": `Bearer ${token}` }
     });
+    alert(response.data);
     return response;
-  } catch (error) {
-    console.error("Error adding employee:", error);
+  }  catch (error) {
+    // Log full error to see what went wrong
+    if (error.response) {
+      // Backend responded with a status code outside the 2xx range
+      console.error("Backend error response:", error.response);
+      alert(`❌ error: ${error.response.data || error.response.statusText}`);
+    } else if (error.request) {
+      // Request was made but no response was received
+      console.error("No response received from backend:", error.request);
+      alert("Network error: No response from server.");
+    } else {
+      // Something went wrong in setting up the request
+      console.error("Request setup error:", error.message);
+      alert(`Error: ${error.message}`);
+    }
+
+    // Rethrow the error so it can be handled by the calling code
     throw error;
   }
 };
@@ -82,25 +116,69 @@ const deleteEmployee = async (id, endDate) => {
     const response = await axios.post(Delete_API_URL, { id, endDate }, {
       headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
     });
+    alert(response.data);
     return response.data;
   } catch (error) {
-    console.error("Error deleting employee:", error);
+    // Log full error to see what went wrong
+    if (error.response) {
+      // Backend responded with a status code outside the 2xx range
+      console.error("Backend error response:", error.response);
+      alert(`❌ error: ${error.response.data || error.response.statusText}`);
+    } else if (error.request) {
+      // Request was made but no response was received
+      console.error("No response received from backend:", error.request);
+      alert("Network error: No response from server.");
+    } else {
+      // Something went wrong in setting up the request
+      console.error("Request setup error:", error.message);
+      alert(`Error: ${error.message}`);
+    }
+
+    // Rethrow the error so it can be handled by the calling code
     throw error;
   }
 };
 
-// Function to delete an employee
 const loginEmloyee = async (email, password) => {
   try {
     const response = await axios.post(Login_API_URL, { email, password }, {
-      headers: {  "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" }
     });
-    return response.data;
+
+    return response.data; // Return response data if login is successful
   } catch (error) {
-    console.error("Error deleting employee:", error);
-    throw error;
+    let errorMessage = "An unknown error occurred.";
+
+    if (error.response) {
+      // Backend responded with a status code outside the 2xx range
+      console.error("Backend error response:", error.response);
+      
+      if (error.response.status === 401) {
+        errorMessage = "❌ Invalid credentials. Please try again.";
+      } else if (error.response.status === 403) {
+        errorMessage = "⛔ Access denied. You do not have permission to log in.";
+      } else if (error.response.status === 500) {
+        errorMessage = "⚠️ Server error. Please try again later.";
+      } else {
+        errorMessage = `❌ Error: ${error.response.data.error || error.response.statusText}`;
+      }
+    } else if (error.request) {
+      // Request was made but no response was received
+      console.error("No response received from backend:", error.request);
+      errorMessage = "🌐 Network error: No response from server.";
+    } else {
+      // Something went wrong in setting up the request
+      console.error("Request setup error:", error.message);
+      errorMessage = `⚠️ Request error: ${error.message}`;
+    }
+
+    alert(errorMessage); // Show error message to user
+   
+
+    throw error; // Rethrow for handling in calling function
   }
 };
+
 
 
 export { addEmployee, getAllEmployees, deleteEmployee ,loginEmloyee,updateEmployee};

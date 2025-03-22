@@ -17,24 +17,43 @@ const Delete_API_URL = "http://localhost:8080/api/user/delete";
 
 // Fetch the token from the backend
 const addEmployee = async (employeeData) => {
+  try {
+    const updatedEmployeeData = {
+      ...employeeData
+    };
 
-    try {
-      const updatedEmployeeData = {
-        ...employeeData
-       
-      };
-  
-      const token = await getToken();  // ✅ Fix: Await getToken()
-  
-      const response = await axios.post(API_URL, updatedEmployeeData, {
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-      return response;
-    } catch (error) {
-      console.error("Error adding employee:", error);
-      throw error;
+    const token = await getToken();  // ✅ Ensure token is being fetched correctly
+    console.log("Token:", token);  // Debug: Check if token is being fetched correctly
+
+    const response = await axios.post(API_URL, updatedEmployeeData, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    // Log the full response for debugging
+    console.log("Response from backend:", response);
+    alert(response.data);
+    return response;
+  } catch (error) {
+    // Log full error to see what went wrong
+    if (error.response) {
+      // Backend responded with a status code outside the 2xx range
+      console.error("Backend error response:", error.response);
+      alert(`❌ error: ${error.response.data || error.response.statusText}`);
+    } else if (error.request) {
+      // Request was made but no response was received
+      console.error("No response received from backend:", error.request);
+      alert("Network error: No response from server.");
+    } else {
+      // Something went wrong in setting up the request
+      console.error("Request setup error:", error.message);
+      alert(`Error: ${error.message}`);
     }
-  };
+
+    // Rethrow the error so it can be handled by the calling code
+    throw error;
+  }
+};
+
   // Fetch the token from the backend
 const addEmployeePage = async (employeeData) => {
 
@@ -83,22 +102,62 @@ const deleteRole = async (id) => {
       });
       return response;
     } catch (error) {
-      console.error("Error deleting employee:", error);
+      // Log full error to see what went wrong
+      if (error.response) {
+        // Backend responded with a status code outside the 2xx range
+        console.error("Backend error response:", error.response);
+        alert(`❌ error: ${error.response.data || error.response.statusText}`);
+      } else if (error.request) {
+        // Request was made but no response was received
+        console.error("No response received from backend:", error.request);
+        alert("Network error: No response from server.");
+      } else {
+        // Something went wrong in setting up the request
+        console.error("Request setup error:", error.message);
+        alert(`Error: ${error.message}`);
+      }
+  
+      // Rethrow the error so it can be handled by the calling code
       throw error;
     }
   };
   const updateRole = async (data) => {
     try {
-      const token = await getToken(); // ✅ Fix: Await getToken()
+      const token = await getToken();  // ✅ Ensure token is being fetched properly
+      console.log("Token:", token);  // Debug: Check if token is being fetched correctly
+  
       const response = await axios.post(API_URL_Update, data, {
-        headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
+        headers: { 
+          "Authorization": `Bearer ${token}`, 
+          "Content-Type": "application/json" 
+        }
       });
+  
+      // Log the full response for debugging
+      console.log("Response from backend:", response);
+  
       return response;
     } catch (error) {
-      console.error("Error deleting employee:", error);
+      // Log full error to see what went wrong
+      if (error.response) {
+        // Backend responded with a status code outside the 2xx range
+        console.error("Backend error response:", error.response);
+        alert(`❌ error: ${error.response.data || error.response.statusText}`);
+      } else if (error.request) {
+        // Request was made but no response was received
+        console.error("No response received from backend:", error.request);
+        alert("Network error: No response from server.");
+      } else {
+        // Something went wrong in setting up the request
+        console.error("Request setup error:", error.message);
+        alert(`Error: ${error.message}`);
+      }
+  
+      // Rethrow the error so it can be handled by the calling code
       throw error;
     }
   };
+  
    // Function to delete an employee
 const deletePemission = async (data) => {
   try {
@@ -106,9 +165,25 @@ const deletePemission = async (data) => {
     const response = await axios.post(API_URL_DELETE_Permission, data, {
       headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json" }
     });
+    alert(response.data);
     return response.data;
   } catch (error) {
-    console.error("Error deleting employee:", error);
+    // Log full error to see what went wrong
+    if (error.response) {
+      // Backend responded with a status code outside the 2xx range
+      console.error("Backend error response:", error.response);
+      alert(`❌ error: ${error.response.data || error.response.statusText}`);
+    } else if (error.request) {
+      // Request was made but no response was received
+      console.error("No response received from backend:", error.request);
+      alert("Network error: No response from server.");
+    } else {
+      // Something went wrong in setting up the request
+      console.error("Request setup error:", error.message);
+      alert(`Error: ${error.message}`);
+    }
+
+    // Rethrow the error so it can be handled by the calling code
     throw error;
   }
 };
@@ -191,9 +266,25 @@ const saveRolesToDatabase = async (selectedRole,employeeData) => {
       const response = await axios.post(API_URL_PERMISSION, updatedEmployeeData, {
         headers: { "Authorization": `Bearer ${token}` }
       });
+      alert(response.data);
       return response;
     } catch (error) {
-      console.error("Error adding employee:", error);
+      // Log full error to see what went wrong
+      if (error.response) {
+        // Backend responded with a status code outside the 2xx range
+        console.error("Backend error response:", error.response);
+        alert(`❌ error: ${error.response.data || error.response.statusText}`);
+      } else if (error.request) {
+        // Request was made but no response was received
+        console.error("No response received from backend:", error.request);
+        alert("Network error: No response from server.");
+      } else {
+        // Something went wrong in setting up the request
+        console.error("Request setup error:", error.message);
+        alert(`Error: ${error.message}`);
+      }
+  
+      // Rethrow the error so it can be handled by the calling code
       throw error;
     }
   };
@@ -212,9 +303,25 @@ const addAssignPermission = async (employeeData) => {
     const response = await axios.post(API_URL_AssignPermission, updatedEmployeeData, {
       headers: { "Authorization": `Bearer ${token}` }
     });
+    alert(response.data);
     return response;
-  } catch (error) {
-    console.error("Error adding employee:", error);
+  }catch (error) {
+    // Log full error to see what went wrong
+    if (error.response) {
+      // Backend responded with a status code outside the 2xx range
+      console.error("Backend error response:", error.response);
+      alert(`❌ error: ${error.response.data || error.response.statusText}`);
+    } else if (error.request) {
+      // Request was made but no response was received
+      console.error("No response received from backend:", error.request);
+      alert("Network error: No response from server.");
+    } else {
+      // Something went wrong in setting up the request
+      console.error("Request setup error:", error.message);
+      alert(`Error: ${error.message}`);
+    }
+
+    // Rethrow the error so it can be handled by the calling code
     throw error;
   }
 };

@@ -79,23 +79,12 @@ const EmployeeManagement = () => {
     setLoading(true);
     try {
       const response = await addAssignPermission(formData);
-      if (response.status === 200) {
-        alert("Successfully Inserted");
-  
-        // Instead of manually adding to employees, fetch fresh data
-        await fetchUsers();  
-  
-        setFormData({ userName: "", roleName: "" });
-        setShowForm(false);
-        window.location.reload();
-      } else if (response.status === 409) {
-        alert("Failed to Insert: Role already exists.");
-      } else {
-        alert("An unexpected error occurred.");
-      }
+      setFormData({ userName: "", roleName: "" });
+      setShowForm(false);
+      window.location.reload();
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to add role.");
+    
     } finally {
       setLoading(false);
     }
@@ -125,7 +114,7 @@ const EmployeeManagement = () => {
     setLoadingDelete(selectedEmployee.id);
     try {
       await deletePemission ({id:selectedEmployee.id, roleName:selectedRole}); // Send only assigned role
-      alert("Employee role removed successfully.");
+     // alert("Employee role removed successfully.");
   
       // Update local state: Remove only the selected role
       setEmployees(prev =>
@@ -138,7 +127,7 @@ const EmployeeManagement = () => {
       window.location.reload();
     } catch (error) {
       console.error("Error:", error);
-      alert("Failed to remove employee role.");
+     // alert("Failed to remove employee role.");
     } finally {
       setLoadingDelete(null);
       setShowModal(false);

@@ -4,34 +4,42 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useRole } from "../context/RoleContext"; // Import useRole
 import { loginEmloyee } from "../services/employeeService";
 import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
+import ErrorModal from "../context/ErrorModal";
 
 const Login = () => {
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
   const { setRoleData } = useRole(); // Get setRoleData from context
-  const handleLogin = async(e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    
-    const response = await loginEmloyee(email, password);
-   
-    if (response.result === "Authenticated") {
-      console.log("Role Data:", response.Role);
-      localStorage.setItem("roleData", response.Role);
-      setRoleData(response.Role); // Set roleData in context
-      const sessionExpiryTime = Date.now() + 10 * 60 * 1000; // Set expiry (10 minutes)
-      localStorage.setItem("authToken", response.token);
-      localStorage.setItem("refreshToken", response.refreshToken);
-      sessionStorage.setItem("isAuthenticated", "true");
-      sessionStorage.setItem("expiry", sessionExpiryTime); // Store expiry time
-      navigate("/AttendanceAdd");
-      window.location.reload(); // ✅ Reload to trigger useEffect in `App.js`
-      
-    } else {
-      navigate("/reg");
+  ErrorModal({title: "Error", message: "Invalid credentials. Please try again."});
+    try {
+
+      const response = await loginEmloyee(email, password);
+  
+      if (response?.result === "Authenticated") {
+        console.log("Role Data:", response.Role);
+        localStorage.setItem("roleData", response.Role);
+        setRoleData(response.Role); // Set roleData in context
+  
+        const sessionExpiryTime = Date.now() + 10 * 60 * 1000; // Set expiry (10 minutes)
+        localStorage.setItem("authToken", response.token);
+        localStorage.setItem("refreshToken", response.refreshToken);
+        sessionStorage.setItem("isAuthenticated", "true");
+        sessionStorage.setItem("expiry", sessionExpiryTime); // Store expiry time
+  
+        navigate("/AttendanceAdd");
+        window.location.reload(); // ✅ Reload to trigger useEffect in `App.js`
+      } else {
+        alert("⚠️ Invalid credentials. Please try again.");
+        navigate("/reg");
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
     }
   };
-  
   
 
   return (

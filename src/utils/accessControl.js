@@ -5,10 +5,10 @@ export const checkAccessComponent = (menuName, pageName,componentName ) => {
     const parsedData = JSON.parse(storedRoleData);
 
     if (!parsedData || !parsedData.menus) {
-        console.error("❌ Role Data is missing or incorrect:", parsedData);
+      //  console.error("❌ Role Data is missing or incorrect:", parsedData);
         return false;
     }
-     console.log("parsedData",parsedData);
+    // console.log("parsedData",parsedData);
     const hasAccess = parsedData.menus.some((menu) =>
         menu.menuName === menuName &&
         menu.pages.some((page) =>
@@ -17,11 +17,11 @@ export const checkAccessComponent = (menuName, pageName,componentName ) => {
         )
     );
 
-    console.log(
+   /*  console.log(
         hasAccess
             ? `✅ Access granted to component: ${componentName} on ${pageName} under ${menuName}`
             : `❌ No access to component: ${componentName} on ${pageName} under ${menuName}`
-    );
+    ); */
 
     return hasAccess;
 };
@@ -33,7 +33,7 @@ export const checkAccess = (menuName, pageName) => {
     const parsedData = JSON.parse(storedRoleData);
 
     if (!parsedData || !parsedData.menus) {
-        console.error("❌ Role Data is missing or incorrect:", parsedData);
+      //  console.error("❌ Role Data is missing or incorrect:", parsedData);
         return false;
     }
 
@@ -42,11 +42,11 @@ export const checkAccess = (menuName, pageName) => {
             menu.pages.some((page) => page.pageName === pageName)
     );
 
-    console.log(
+   /*  console.log(
         hasAccess
             ? `✅ Access granted to ${pageName} under ${menuName}`
             : `❌ No access to ${pageName} under ${menuName}`
-    );
+    ); */
 
     return hasAccess;
 };
@@ -58,17 +58,17 @@ export const checkAccessMenu = (menuName) => {
     const parsedData = JSON.parse(storedRoleData);
 
     if (!parsedData || !parsedData.menus) {
-        console.error("❌ Role Data is missing or incorrect:", parsedData);
+       // console.error("❌ Role Data is missing or incorrect:", parsedData);
         return false;
     }
 
     const hasAccess = parsedData.menus.some((menu) => menu.menuName === menuName);
 
-    console.log(
+   /*  console.log(
         hasAccess
             ? `✅ Access granted to ${menuName}`
             : `❌ No access to ${menuName}`
-    );
+    ); */
 
     return hasAccess;
 };
