@@ -1,7 +1,8 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8181/api/auth/login"; // Assuming your API has a POST endpoint for login
-// Function to delete an employee
+const BASE_URL_AUTH = process.env.REACT_APP_API_URL_Attendance || `http://${window.location.hostname}:8181`;
+
+const API_URL = `${BASE_URL_AUTH}/api/auth/login`;// Function to delete an employee
 const loginEmloyee = async (userName, password) => {
    // const token = await getToken(); // ✅ Fix: Await getToken()
     alert(userName);

@@ -54,8 +54,7 @@ const EmployeeManagement = () => {
   const fetchEmployees = async () => {
     try {
       const response = await getAllEmployees("1");
-      console.log("Employees API Response:", response); // Debugging
-
+    
       setEmployees(
         response && Array.isArray(response)
           ? response.map(emp => ({

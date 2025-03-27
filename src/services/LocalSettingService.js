@@ -1,10 +1,12 @@
 import axios from "axios";
 
 import {getToken} from "./Auth";
-const API_URL = "http://localhost:8181/api/localSetting/insert"; 
-const GET_API_URL = "http://localhost:8181/api/localSetting/getAll"; 
-const DELETE_API_URL = "http://localhost:8181/api/localSetting/delete"; 
-const Update_API_URL = "http://localhost:8181/api/localSetting/update";
+const BASE_URL_LOCAL_SETTING = process.env.REACT_APP_API_URL_Attendance || `http://${window.location.hostname}:8181`;
+
+const API_URL = `${BASE_URL_LOCAL_SETTING}/api/localSetting/insert`;
+const GET_API_URL = `${BASE_URL_LOCAL_SETTING}/api/localSetting/getAll`;
+const DELETE_API_URL = `${BASE_URL_LOCAL_SETTING}/api/localSetting/delete`;
+const Update_API_URL = `${BASE_URL_LOCAL_SETTING}/api/localSetting/update`;
 
 
 

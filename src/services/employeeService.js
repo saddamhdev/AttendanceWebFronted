@@ -1,11 +1,13 @@
 import axios from "axios";
 import {getToken} from "./Auth";
 
-const API_URL = "http://localhost:8080/api/user/insert"; 
-const Update_API_URL = "http://localhost:8080/api/user/update"; 
-const GET_API_URL = "http://localhost:8080/api/user/getAll";
-const Delete_API_URL = "http://localhost:8080/api/user/delete";
-const Login_API_URL = "http://localhost:8080/api/user/login";
+const BASE_URL_USER_SERVICE = process.env.REACT_APP_API_URL_UserService || `http://${window.location.hostname}:8080`;
+
+const API_URL = `${BASE_URL_USER_SERVICE}/api/user/insert`;
+const Update_API_URL = `${BASE_URL_USER_SERVICE}/api/user/update`;
+const GET_API_URL = `${BASE_URL_USER_SERVICE}/api/user/getAll`;
+const Delete_API_URL = `${BASE_URL_USER_SERVICE}/api/user/delete`;
+const Login_API_URL = `${BASE_URL_USER_SERVICE}/api/user/login`;
 
 // Fetch the token from the backend
 

@@ -16,7 +16,7 @@ const EditableTable = () => {
   const fetchPositionData = async () => {
     try {
       const response = await getAllEmployees("1");
-      console.log("Fetched position data:", response);
+     
 
       setData(response);
       setEditValues(response.map((row) => row.position));

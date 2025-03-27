@@ -1,10 +1,12 @@
 import axios from "axios";
 import {getToken} from "./Auth";
 
-const API_URL = "http://localhost:8181/api/globalSetting/insert"; 
-const GET_API_URL = "http://localhost:8181/api/globalSetting/getAll"; 
-const Delete_API_URL = "http://localhost:8181/api/globalSetting/delete"; 
-const Update_API_URL = "http://localhost:8181/api/globalSetting/update"; 
+const BASE_URL_GLOBAL_SETTING = process.env.REACT_APP_API_URL_Attendance || `http://${window.location.hostname}:8181`;
+
+const API_URL = `${BASE_URL_GLOBAL_SETTING}/api/globalSetting/insert`;
+const GET_API_URL = `${BASE_URL_GLOBAL_SETTING}/api/globalSetting/getAll`;
+const Delete_API_URL = `${BASE_URL_GLOBAL_SETTING}/api/globalSetting/delete`;
+const Update_API_URL = `${BASE_URL_GLOBAL_SETTING}/api/globalSetting/update`;
 
 const formatCurrentTime = () => {
   const now = new Date();

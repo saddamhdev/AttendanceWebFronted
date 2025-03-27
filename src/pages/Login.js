@@ -13,12 +13,9 @@ const Login = () => {
   const navigate = useNavigate();
   const { setRoleData } = useRole(); // Get setRoleData from context
   const [error, setError] = useState(null);
-  const [showModalError, setShowModalError] = useState(false);
-
   // Function to trigger the modal
   const handleError = (message) => {
     setError(message);
-    setShowModalError(true);
   };
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -28,7 +25,7 @@ const Login = () => {
       const response = await loginEmloyee(email, password, handleError);// here i  want to send modal to another function
 
       if (response?.result === "Authenticated") {
-        console.log("Role Data:", response.Role);
+       
         localStorage.setItem("roleData", response.Role);
         setRoleData(response.Role); // Set roleData in context
 
@@ -49,7 +46,7 @@ const Login = () => {
 
   return (
     <>
-      {error && <ErrorModal show={true} title="Error" message={error} onClose={() => setError(null)} />}
+      {error && <ErrorModal show={true}  message={error} onClose={() => setError(null)} />}
       <div className="d-flex justify-content-center align-items-center vh-100" style={{ backgroundColor: "#f4f6f9" }}>
         <div className="card p-4 shadow-lg" style={{ width: "350px", borderRadius: "10px" }}>
           <h4 className="text-center mb-3">Login</h4>

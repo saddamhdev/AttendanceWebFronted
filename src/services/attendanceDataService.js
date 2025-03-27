@@ -1,14 +1,15 @@
 import axios from "axios";
 import {getToken} from "./Auth"; // Import getToken function
 
-const API_URL = "http://localhost:8181/api/attendance/insert";
-const exportAllAttendanceData_URL = "http://localhost:8181/api/attendance/exportAllAttendanceData";
-const GetAllAttendanceData_URL = "http://localhost:8181/api/attendance/getAllAttendanceData";
-const GetAllAttendanceDataForFixedDay_URL = "http://localhost:8181/api/attendance/getAllAttendanceDataForFixedDay";
-const updateAttendanceData_URL = "http://localhost:8181/api/attendance/updateAttendanceData";
-const GetAttendanceDataForAnyPeriod_URL = "http://localhost:8181/api/attendance/getAttendanceDataForAnyPeriod";
-const exportSummaryAttendanceData_URL = "http://localhost:8181/api/attendance/exportSummaryAttendanceData";
+const BASE_URL_ATTENDANCE = process.env.REACT_APP_API_URL_Attendance || `http://${window.location.hostname}:8181`;
 
+const API_URL = `${BASE_URL_ATTENDANCE}/api/attendance/insert`;
+const exportAllAttendanceData_URL = `${BASE_URL_ATTENDANCE}/api/attendance/exportAllAttendanceData`;
+const GetAllAttendanceData_URL = `${BASE_URL_ATTENDANCE}/api/attendance/getAllAttendanceData`;
+const GetAllAttendanceDataForFixedDay_URL = `${BASE_URL_ATTENDANCE}/api/attendance/getAllAttendanceDataForFixedDay`;
+const updateAttendanceData_URL = `${BASE_URL_ATTENDANCE}/api/attendance/updateAttendanceData`;
+const GetAttendanceDataForAnyPeriod_URL = `${BASE_URL_ATTENDANCE}/api/attendance/getAttendanceDataForAnyPeriod`;
+const exportSummaryAttendanceData_URL = `${BASE_URL_ATTENDANCE}/api/attendance/exportSummaryAttendanceData`;
 const saveAttendance = async (attendanceData) => {
   try {
     const token = await getToken();

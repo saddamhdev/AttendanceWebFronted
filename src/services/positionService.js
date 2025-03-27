@@ -1,10 +1,12 @@
 import axios from "axios";
 
 import {getToken} from "./Auth";
-const API_URL = "http://localhost:8181/api/positionSetting/insert"; 
-const GET_API_URL = "http://localhost:8181/api/positionSetting/getAll"; 
-const DELETE_API_URL = "http://localhost:8181/api/positionSetting/delete"; 
-const UPDATE_API_URL = "http://localhost:8181/api/positionSetting/updateSortingPosition"; 
+const BASE_URL_POSITION_SETTING = process.env.REACT_APP_API_URL_Attendance || `http://${window.location.hostname}:8181`;
+
+const API_URL = `${BASE_URL_POSITION_SETTING}/api/positionSetting/insert`;
+const GET_API_URL = `${BASE_URL_POSITION_SETTING}/api/positionSetting/getAll`;
+const DELETE_API_URL = `${BASE_URL_POSITION_SETTING}/api/positionSetting/delete`;
+const UPDATE_API_URL = `${BASE_URL_POSITION_SETTING}/api/positionSetting/updateSortingPosition`;
 
 
 

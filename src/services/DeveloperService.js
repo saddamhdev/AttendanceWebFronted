@@ -1,11 +1,15 @@
 // Function to add an employee
 import axios from "axios";
 import {getToken} from "./Auth";
-const API_URL = "http://localhost:8080/api/developer/insert"; 
-const API_URL_Page = "http://localhost:8080/api/developer/insertPage"; 
-const API_URL_Component = "http://localhost:8080/api/developer/insertComponent"; 
-const GET_API_URL = "http://localhost:8080/api/developer/getAll";
-const Delete_API_URL = "http://localhost:8080/api/user/delete";
+
+const BASE_URL_USER = process.env.REACT_APP_API_URL_UserService || `http://${window.location.hostname}:8080`;
+const BASE_URL_ATTENDANCE = process.env.REACT_APP_API_URL_Attendance || `http://${window.location.hostname}:8181`;
+
+const API_URL           = `${BASE_URL_USER}/api/developer/insert`;
+const API_URL_Page      = `${BASE_URL_USER}/api/developer/insertPage`;
+const API_URL_Component = `${BASE_URL_USER}/api/developer/insertComponent`;
+const GET_API_URL       = `${BASE_URL_USER}/api/developer/getAll`;
+const Delete_API_URL    = `${BASE_URL_USER}/api/user/delete`;
 
 // Fetch the token from the backend
 const addEmployee = async (employeeData) => {

@@ -1,7 +1,9 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080/api/user/token";
-const API_URL_REFRESH = "http://localhost:8080/api/user/refresh";
+const BASE_URL_USER_SERVICE = process.env.REACT_APP_API_URL_UserService || `http://${window.location.hostname}:8080`;
+
+const API_URL = `${BASE_URL_USER_SERVICE}/api/user/token`;
+const API_URL_REFRESH = `${BASE_URL_USER_SERVICE}/api/user/refresh`;
 
 const getToken = () => {
     try {

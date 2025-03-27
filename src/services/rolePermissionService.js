@@ -1,19 +1,21 @@
 // Function to add an employee
 import axios from "axios";
 import {getToken} from "./Auth";
-const API_URL = "http://localhost:8080/api/role/insert"; 
-const API_URL_DELETE = "http://localhost:8080/api/role/delete"; 
-const API_URL_DELETE_Permission = "http://localhost:8080/api/role/deletePermission"; 
-const API_URL_Update = "http://localhost:8080/api/role/update"; 
-const API_URL_PERMISSION = "http://localhost:8080/api/role/permission"; 
-const API_URL_Page = "http://localhost:8080/api/developer/insertPage"; 
-const API_URL_Component = "http://localhost:8080/api/developer/insertComponent"; 
-const GET_API_URL = "http://localhost:8080/api/role/getAll";
-const GET_API_URL_SINGLE_ROLE_DATA = "http://localhost:8080/api/role/getSingleRoleData";
-const GET_API_URL_USERS = "http://localhost:8080/api/user/getAll";
-const GET_API_URL_ROLE = "http://localhost:8080/api/role/getAllRole";
-const API_URL_AssignPermission = "http://localhost:8080/api/role/assignPermission";
-const Delete_API_URL = "http://localhost:8080/api/user/delete";
+const BASE_URL_ROLE = process.env.REACT_APP_API_URL_UserService || `http://${window.location.hostname}:8080`;
+
+const API_URL = `${BASE_URL_ROLE}/api/role/insert`;
+const API_URL_DELETE = `${BASE_URL_ROLE}/api/role/delete`;
+const API_URL_DELETE_Permission = `${BASE_URL_ROLE}/api/role/deletePermission`;
+const API_URL_Update = `${BASE_URL_ROLE}/api/role/update`;
+const API_URL_PERMISSION = `${BASE_URL_ROLE}/api/role/permission`;
+const API_URL_Page = `${BASE_URL_ROLE}/api/developer/insertPage`;
+const API_URL_Component = `${BASE_URL_ROLE}/api/developer/insertComponent`;
+const GET_API_URL = `${BASE_URL_ROLE}/api/role/getAll`;
+const GET_API_URL_SINGLE_ROLE_DATA = `${BASE_URL_ROLE}/api/role/getSingleRoleData`;
+const GET_API_URL_USERS = `${BASE_URL_ROLE}/api/user/getAll`;
+const GET_API_URL_ROLE = `${BASE_URL_ROLE}/api/role/getAllRole`;
+const API_URL_AssignPermission = `${BASE_URL_ROLE}/api/role/assignPermission`;
+const Delete_API_URL = `${BASE_URL_ROLE}/api/user/delete`;
 
 // Fetch the token from the backend
 const addEmployee = async (employeeData) => {
