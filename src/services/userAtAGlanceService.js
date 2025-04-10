@@ -1,6 +1,6 @@
 import axios from "axios";
 import {getToken} from "./Auth";
-const BASE_URL_USER_AT_A_GLANCE = process.env.REACT_APP_API_URL_UserService || `http://${window.location.hostname}:8181`;
+const BASE_URL_USER_AT_A_GLANCE = process.env.REACT_APP_API_URL_Attendance || `http://${window.location.hostname}:8181`;
 
 const GET_API_URL = `${BASE_URL_USER_AT_A_GLANCE}/api/userAtAGlance/getAll`;
 const EXPORT_API_URL = `${BASE_URL_USER_AT_A_GLANCE}/api/userAtAGlance/exportAtAGlanceData`;

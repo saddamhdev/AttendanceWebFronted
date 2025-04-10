@@ -1,21 +1,33 @@
-# Use the official Node.js image as the base image
-FROM node:22 AS build
+# Step 1: Build React app
+FROM node:22 AS builder
 
 WORKDIR /app
 
+# Copy only package files first to install dependencies (better for caching)
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install
+
+# Copy the rest of the source code (including public/index.html)
 COPY . .
+
+# Build the app
 RUN npm run build
 
-# Use the official Nginx image
-FROM nginx:alpine
+# Step 2: Run the app using 'serve'
+FROM node:22-slim
 
-# Copy the updated nginx.conf
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Install 'serve' globally
+RUN npm install -g serve
 
-# Copy the build output to Nginx html directory
-COPY --from=build /app/build /usr/share/nginx/html
+WORKDIR /app
 
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Copy the built React app from the builder stage
+COPY --from=builder /app/build ./build
+
+# Expose port 3000
+EXPOSE 3000
+
+# Command to run the app
+CMD ["serve", "-s", "build", "-l", "3000"]
