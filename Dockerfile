@@ -27,7 +27,7 @@ WORKDIR /app
 COPY --from=builder /app/build ./build
 
 # Expose port 3000
-EXPOSE 3000
+EXPOSE 3082
 
 # Command to run the app
-CMD ["serve", "-s", "build", "-l", "3000"]
+CMD ["serve", "-s", "build", "-l", "3082"]
