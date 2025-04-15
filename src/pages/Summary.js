@@ -69,109 +69,137 @@ const AttendanceSheet = () => {
     if (selectedUser) setEmployeeId(selectedUser.idNumber);
   };
 
-  // Export Data
-  const exportData = async () => {
-    setLoading(true);
-    await exportSummaryAttendanceData(employees);
-    setLoading(false);
+ // Export Data
+const exportData = async () => {
+  setLoading(true);
+  const success = await exportSummaryAttendanceData(employees);
+  setLoading(false);
+
+  if (success) {
     alert("Exported successfully to Download directory");
-  };
+  } else {
+    alert("Export failed. Please check your internet or try again later.");
+  }
+};
 
-  return (
-    <>
-      <Navbar />
-      <div className="container mt-4" style={{ paddingTop: "100px" }}>
-        <div className="d-flex align-items-center mb-3">
-          <Form.Control type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="me-2" />
-          <Form.Control type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className="me-2" />
+return (
+  <>
+    <Navbar />
+    <div className="container mt-4" style={{ paddingTop: "100px" }}>
+      {/* Date Range Filters */}
+      <div className="row mb-3">
+        <div className="col-12 col-md-6 mb-2">
+          <Form.Control
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
         </div>
-
-        <div className="border p-3 mb-4">
-          <h5 className="text-center">Monthly Attendance Sheet</h5>
-          <div className="d-flex justify-content-between mt-2">
-            <span>Start Date: {startDate}</span>
-            <span>End Date: {endDate}</span>
-          </div>
+        <div className="col-12 col-md-6 mb-2">
+          <Form.Control
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
         </div>
+      </div>
 
-        {/* User Selection & Export Button */}
-        <div className="d-flex align-items-center gap-3 mb-3">
-          <Form.Select value={employeeName} onChange={handleUserChange} style={{ maxWidth: "250px" }}>
+      {/* Summary Header */}
+      <div className="border p-3 mb-4 text-center">
+        <h5>Monthly Attendance Sheet</h5>
+        <div className="row mt-2">
+          <div className="col-6 text-start">Start Date: {startDate}</div>
+          <div className="col-6 text-end">End Date: {endDate}</div>
+        </div>
+      </div>
+
+      {/* User Dropdown & Export Button */}
+      <div className="row align-items-center mb-3">
+        <div className="col-12 col-md-6 mb-2">
+          <Form.Select
+            value={employeeName}
+            onChange={handleUserChange}
+            style={{ maxWidth: "100%" }}
+          >
             {users.map((us) => (
               <option key={us.idNumber} value={us.name}>
                 {us.name}
               </option>
             ))}
           </Form.Select>
-          {checkAccessComponent("User","Summary","Export") && (
-                    <>
-                      <Button variant="dark" onClick={exportData} disabled={!employees || employees.length === 0}>
-                      Export Data
-                    </Button>
-                      
-                    </>
-                  ) }
-          
         </div>
-
-        <div className="table-responsive mt-4">
-          <Table bordered hover className="text-center">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Entry Time</th>
-                <th>Late Duration</th>
-                <th>Entry Comment</th>
-                <th>Exit Time</th>
-                <th>Time After Exit</th>
-                <th>Exit Comment</th>
-                <th>Out Time</th>
-                <th>Total Time In Day</th>
-                <th>Day Comment</th>
-                <th>Comment</th>
-              </tr>
-            </thead>
-            <tbody>
-              {employees?.length > 0 ? (
-                [...employees]
-                  .sort((a, b) => new Date(a.date) - new Date(b.date)) // Sorting by date
-                  .map((emp, index) => (
-                    <tr key={index}>
-                      <td>{emp.date}</td>
-                      <td>{emp.entryTime}</td>
-                      <td>{emp.lateDuration}</td>
-                      <td>{emp.entryComment}</td>
-                      <td>{emp.exitTime}</td>
-                      <td>{emp.timeAfterExit}</td>
-                      <td>{emp.exitComment}</td>
-                      <td>{emp.outTime}</td>
-                      <td>{emp.totalTimeInDay}</td>
-                      <td>{emp.dayComment}</td>
-                      <td>{emp.comment}</td>
-                    </tr>
-                  ))
-              ) : (
-                <tr>
-                  <td colSpan="11" className="text-center text-danger" style={{ verticalAlign: "middle" }}>
-                    No attendance data available
-                  </td>
-                </tr>
-              )}
-            </tbody>
-
-          </Table>
-        </div>
+        {checkAccessComponent("User", "Summary", "Export") && (
+          <div className="col-12 col-md-6 mb-2">
+            <Button
+              variant="dark"
+              onClick={exportData}
+              disabled={!employees || employees.length === 0}
+              className="w-100"
+            >
+              Export Data
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Loading Popup */}
-      <Modal show={loading} backdrop="static" centered>
-        <Modal.Body className="text-center">
-          <Spinner animation="border" variant="primary" />
-          <p className="mt-2">Fetching data, please wait...</p>
-        </Modal.Body>
-      </Modal>
-    </>
-  );
-};
+      {/* Attendance Table */}
+      <div className="table-responsive mt-4">
+        <Table bordered hover className="text-center">
+          <thead className="table-light">
+            <tr>
+              <th>Date</th>
+              <th>Entry Time</th>
+              <th>Late Duration</th>
+              <th>Entry Comment</th>
+              <th>Exit Time</th>
+              <th>Time After Exit</th>
+              <th>Exit Comment</th>
+              <th>Out Time</th>
+              <th>Total Time In Day</th>
+              <th>Day Comment</th>
+              <th>Comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employees?.length > 0 ? (
+              [...employees]
+                .sort((a, b) => new Date(a.date) - new Date(b.date))
+                .map((emp, index) => (
+                  <tr key={index}>
+                    <td>{emp.date}</td>
+                    <td>{emp.entryTime}</td>
+                    <td>{emp.lateDuration}</td>
+                    <td>{emp.entryComment}</td>
+                    <td>{emp.exitTime}</td>
+                    <td>{emp.timeAfterExit}</td>
+                    <td>{emp.exitComment}</td>
+                    <td>{emp.outTime}</td>
+                    <td>{emp.totalTimeInDay}</td>
+                    <td>{emp.dayComment}</td>
+                    <td>{emp.comment}</td>
+                  </tr>
+                ))
+            ) : (
+              <tr>
+                <td colSpan="11" className="text-center text-danger" style={{ verticalAlign: "middle" }}>
+                  No attendance data available
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </Table>
+      </div>
+    </div>
+
+    {/* Loading Modal */}
+    <Modal show={loading} backdrop="static" centered>
+      <Modal.Body className="text-center">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-2">Fetching data, please wait...</p>
+      </Modal.Body>
+    </Modal>
+  </>
+);
+}
 
 export default AttendanceSheet;

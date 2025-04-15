@@ -22,7 +22,7 @@ const getAllAtAGlanceData = async (employeeId, employeeName, startDate, endDate)
   }
 };
 
-const exportAtAGlanceData = async (AtAGlanceData) => {
+const exportAtAGlanceData1 = async (AtAGlanceData) => {
   try {
     const response = await axios.post(EXPORT_API_URL, AtAGlanceData, {
       headers: {
@@ -36,4 +36,53 @@ const exportAtAGlanceData = async (AtAGlanceData) => {
   }
 };
 
+const exportAtAGlanceData = async (AtAGlanceData) => {
+  try {
+    const token = await getToken();
+    const response = await axios.post(EXPORT_API_URL, AtAGlanceData, {
+      headers: {
+        "Authorization": `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      responseType: 'blob', // Important for Excel/binary files
+    });
+
+    // Create blob from response
+    const blob = new Blob([response.data], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    // Create a download link
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+
+    // Optional: Use timestamp in filename
+    const timestamp = new Date().toISOString().replace(/[-:.]/g, "").slice(0, 15);
+    link.download = `Employee_At_A_Glance_Report_${timestamp}.xlsx`;
+
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+
+    // Cleanup
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    return true; // signal success
+  } catch (error) {
+    console.error("Export failed:", error);
+    if (error.response && error.response.data) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const message = reader.result;
+        alert("Error from server: " + message);
+      };
+      reader.readAsText(error.response.data);
+    } else {
+      alert("Failed to export data. Please try again.");
+    }
+    return false;
+  }
+};
 export { getAllAtAGlanceData, exportAtAGlanceData };

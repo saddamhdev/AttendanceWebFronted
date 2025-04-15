@@ -91,129 +91,211 @@ const AttendanceSheet = () => {
 
   return (
     <>
-      <Navbar />
-      <div className="container mt-4" style={{ paddingTop: "100px" }}>
-        <div className="d-flex align-items-center mb-3">
-          <Button variant="secondary" className="me-2" onClick={() => changeDate(-1)}>
-            {"<"}
-          </Button>
-          <Form.Control type="date" value={selectedDate} onChange={handleDateChange} className="me-2" />
-          <Form.Control type="text" value={formatDate(selectedDate)} readOnly className="me-2" />
-          <Button variant="secondary" onClick={() => changeDate(1)}>
-            {">"}
-          </Button>
+    <Navbar />
+    <div className="container mt-4" style={{ paddingTop: "100px" }}>
+      {/* Date Controls */}
+      <div className="d-flex flex-column flex-md-row align-items-center mb-3 gap-2">
+        <Button variant="secondary" onClick={() => changeDate(-1)}>
+          {"<"}
+        </Button>
+        <Form.Control type="date" value={selectedDate} onChange={handleDateChange} />
+        <Form.Control type="text" value={formatDate(selectedDate)} readOnly />
+        <Button variant="secondary" onClick={() => changeDate(1)}>
+          {">"}
+        </Button>
+      </div>
+  
+      {/* Header Info */}
+      <div className="border p-3">
+        <h5 className="text-center">Daily Attendance Sheet - {selectedDate ? new Date(selectedDate).getFullYear() : ""}</h5>
+        <div className="d-flex justify-content-between flex-wrap mt-2">
+          <span>Month: {getMonthName(selectedDate)}</span>
+          <span>Date: {selectedDate}</span>
         </div>
-
-        <div className="border p-3">
-          <h5 className="text-center">Daily Attendance Sheet - {selectedDate ? new Date(selectedDate).getFullYear() : ""}</h5>
-          <div className="d-flex justify-content-between mt-2">
-            <span>Month: {getMonthName(selectedDate)}</span>
-            <span>Date: {selectedDate}</span>
-          </div>
-        </div>
-
-        <div className="d-flex my-3">
-        <Form.Select className="me-2"  value={employees.length > 0 ? employees[0].status : "Present"}  onChange={handleStatusChange}>
-        <option>Present</option>
-        <option>Absent</option>
-        <option>Leave</option>
-        <option>Holiday</option>
+      </div>
+  
+      {/* Global Status Selectors */}
+      <div className="d-flex flex-column flex-md-row my-3 gap-2">
+        <Form.Select
+          value={employees.length > 0 ? employees[0].status : "Present"}
+          onChange={handleStatusChange}
+        >
+          <option>Present</option>
+          <option>Absent</option>
+          <option>Leave</option>
+          <option>Holiday</option>
         </Form.Select>
-
-          <Form.Select 
-          value={employees.length > 0 ? employees[0].globalDayStatus : "Office"} 
+  
+        <Form.Select
+          value={employees.length > 0 ? employees[0].globalDayStatus : "Office"}
           onChange={handleDayStatusChange}
         >
           <option>Office</option>
           <option>Holiday</option>
         </Form.Select>
-
-        </div>
-
-        <Table bordered hover>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Start Time</th>
-              <th>Reason For Being Late</th>
-              <th>Exit Time</th>
-              <th>Reason For Early Exit</th>
-              <th>Out Time</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {employees.length > 0 ? (
-              employees.map((employee, index) => (
-                <tr key={employee.employeeId}>
-                  <td>{employee.employeeId}</td>
-                  <td>{employee.name}</td>
-                  <td className="d-flex">
-                    <Form.Control type="text" value={employee.startHour} onChange={(e) => handleInputChange(e, index, "startHour")} className="me-1 w-25" />
-                    <Form.Control type="text" value={employee.startMinute} onChange={(e) => handleInputChange(e, index, "startMinute")} className="me-1 w-25" />
-                    <Form.Select value={employee.startPeriod} onChange={(e) => handleInputChange(e, index, "startPeriod")} className="w-50">
-                      <option>AM</option>
-                      <option>PM</option>
-                    </Form.Select>
-                  </td>
-                  <td>
-                    <Form.Control type="text" value={employee.lateEntryReason} onChange={(e) => handleInputChange(e, index, "lateEntryReason")} className="w-100" />
-                  </td>
-                  <td className="d-flex">
-                    <Form.Control type="text" value={employee.exitHour} onChange={(e) => handleInputChange(e, index, "exitHour")} className="me-1 w-25" />
-                    <Form.Control type="text" value={employee.exitMinute} onChange={(e) => handleInputChange(e, index, "exitMinute")} className="me-1 w-25" />
-                    <Form.Select value={employee.exitPeriod} onChange={(e) => handleInputChange(e, index, "exitPeriod")} className="w-50">
-                      <option>AM</option>
-                      <option>PM</option>
-                    </Form.Select>
-                  </td>
-                  <td>
-                    <Form.Control type="text" value={employee.earlyExitReason} onChange={(e) => handleInputChange(e, index, "earlyExitReason")} className="w-100" />
-                  </td>
-                  <td className="d-flex">
-                    <Form.Control type="text" value={employee.outHour} onChange={(e) => handleInputChange(e, index, "outHour")} className="me-1 w-50" />
-                    <Form.Control type="text" value={employee.outMinute} onChange={(e) => handleInputChange(e, index, "outMinute")} className="w-50" />
-                  </td>
-                  <td>
-                    <Form.Select value={employee.status} onChange={(e) => handleInputChange(e, index, "status")}>
-                      <option>Present</option>
-                      <option>Absent</option>
-                      <option>Leave</option>
-                      <option>Holiday</option>
-                    </Form.Select>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="8" className="text-center text-danger fw-bold">
-                  Data not exist
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </Table>
-
-        {checkAccessComponent("Attendance", "UpdateAttendanceAdd", "Update") && employees.length > 0 && (
-          <> 
-          <div className="text-center mt-3">
-            <Button variant="success" onClick={handleUpdate}>Update</Button>
-          </div>
-          </>
-        )}
-
-
-       
       </div>
+  
+      {/* Responsive Table */}
+      <div className="table-responsive">
+      <Table bordered hover responsive>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Start Time</th>
+      <th>Reason For Being Late</th>
+      <th>Exit Time</th>
+      <th>Reason For Early Exit</th>
+      <th>Out Time</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {employees.length > 0 ? (
+      employees.map((employee, index) => (
+        <tr key={employee.employeeId}>
+          <td>{employee.employeeId}</td>
+          <td>{employee.name}</td>
 
-      <Modal show={loading} backdrop="static" centered>
-        <Modal.Body className="text-center">
-          <Spinner animation="border" variant="primary" />
-          <p className="mt-2">Fetching data, please wait...</p>
-        </Modal.Body>
-      </Modal>
-    </>
+          {/* Start Time */}
+          <td className="d-flex flex-wrap gap-1">
+            <Form.Control
+              type="text"
+              value={employee.startHour}
+              onChange={(e) => handleInputChange(e, index, "startHour")}
+              className="w-25 mb-1"
+              style={{ minWidth: "80px" }}
+            />
+            <Form.Control
+              type="text"
+              value={employee.startMinute}
+              onChange={(e) => handleInputChange(e, index, "startMinute")}
+              className="w-25 mb-1"
+              style={{ minWidth: "80px" }}
+            />
+            <Form.Select
+              value={employee.startPeriod}
+              onChange={(e) => handleInputChange(e, index, "startPeriod")}
+              className="w-50 mb-1"
+              style={{ minWidth: "80px" }}
+            >
+              <option>AM</option>
+              <option>PM</option>
+            </Form.Select>
+          </td>
+
+          {/* Late Entry Reason */}
+          <td>
+            <Form.Control
+              type="text"
+              value={employee.lateEntryReason}
+              onChange={(e) => handleInputChange(e, index, "lateEntryReason")}
+              className="w-100 mb-1"
+              style={{ minWidth: "140px" }}
+            />
+          </td>
+
+          {/* Exit Time */}
+          <td className="d-flex flex-wrap gap-1">
+            <Form.Control
+              type="text"
+              value={employee.exitHour}
+              onChange={(e) => handleInputChange(e, index, "exitHour")}
+              className="w-25 mb-1"
+              style={{ minWidth: "80px" }}
+            />
+            <Form.Control
+              type="text"
+              value={employee.exitMinute}
+              onChange={(e) => handleInputChange(e, index, "exitMinute")}
+              className="w-25 mb-1"
+              style={{ minWidth: "80px" }}
+            />
+            <Form.Select
+              value={employee.exitPeriod}
+              onChange={(e) => handleInputChange(e, index, "exitPeriod")}
+              className="w-50 mb-1"
+              style={{ minWidth: "80px" }}
+            >
+              <option>AM</option>
+              <option>PM</option>
+            </Form.Select>
+          </td>
+
+          {/* Early Exit Reason */}
+          <td>
+            <Form.Control
+              type="text"
+              value={employee.earlyExitReason}
+              onChange={(e) => handleInputChange(e, index, "earlyExitReason")}
+              className="w-100 mb-1"
+              style={{ minWidth: "140px" }}
+            />
+          </td>
+
+          {/* Out Time */}
+          <td className="d-flex flex-wrap gap-1">
+            <Form.Control
+              type="text"
+              value={employee.outHour}
+              onChange={(e) => handleInputChange(e, index, "outHour")}
+              className="w-50 mb-1"
+              style={{ minWidth: "80px" }}
+            />
+            <Form.Control
+              type="text"
+              value={employee.outMinute}
+              onChange={(e) => handleInputChange(e, index, "outMinute")}
+              className="w-50 mb-1"
+              style={{ minWidth: "80px" }}
+            />
+          </td>
+
+          {/* Status */}
+          <td>
+            <Form.Select
+              value={employee.status}
+              onChange={(e) => handleInputChange(e, index, "status")}
+              className="w-100 mb-1"
+              style={{ minWidth: "110px" }}
+            >
+              <option>Present</option>
+              <option>Absent</option>
+              <option>Leave</option>
+              <option>Holiday</option>
+            </Form.Select>
+          </td>
+        </tr>
+      ))
+    ) : (
+      <tr>
+        <td colSpan="8" className="text-center text-danger fw-bold">
+          Data not exist
+        </td>
+      </tr>
+    )}
+  </tbody>
+</Table>
+
+      </div>
+  
+      {/* Update Button */}
+      {checkAccessComponent("Attendance", "UpdateAttendanceAdd", "Update") && employees.length > 0 && (
+        <div className="text-center mt-3">
+          <Button variant="success" onClick={handleUpdate}>Update</Button>
+        </div>
+      )}
+    </div>
+  
+    {/* Modal */}
+    <Modal show={loading} backdrop="static" centered>
+      <Modal.Body className="text-center">
+        <Spinner animation="border" variant="primary" />
+        <p className="mt-2">Fetching data, please wait...</p>
+      </Modal.Body>
+    </Modal>
+  </>
+  
   );
 };
 
