@@ -35,7 +35,7 @@ const AttendanceSheet = () => {
     };
 
     fetchData();
-  }, [startDate, endDate]);
+  }, []);
 
  
  // Export Data
@@ -51,27 +51,58 @@ const AttendanceSheet = () => {
   }
 };
 
+const fetchingData = async () => {
+  if (!startDate || !endDate || new Date(startDate) > new Date(endDate)) {
+    console.log("Invalid date range, skipping fetch.");
+    return;
+  } 
+  let requestId = ++latestRequestRef.current;
+  setLoading(true); // Start loading
+
+  const fetchData = async () => {
+    try {
+      const response = await getAttendanceData(startDate, endDate);
+      if (requestId === latestRequestRef.current) {
+      
+        setEmployees(Array.isArray(response) ? response : []);
+      }
+    } catch (error) {
+      console.error("Error fetching attendance data:", error);
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
+
+  fetchData();
+}
+
+
 return (
   <>
-    <Navbar />
-    <div className="container mt-4" style={{ paddingTop: "100px" }}>
-      {/* Date Filters - Stacked on Mobile */}
-      <div className="row mb-3">
-        <div className="col-12 col-md-6 mb-2">
-          <Form.Control
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-        </div>
-        <div className="col-12 col-md-6 mb-2">
-          <Form.Control
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </div>
+   <Navbar />
+  <div className="container mt-4" style={{ paddingTop: "100px" }}>
+    {/* Date Filters - Stacked on Mobile */}
+    <div className="row mb-3">
+      <div className="col-12 col-md-6 mb-2">
+        <Form.Control
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+        />
       </div>
+      <div className="col-12 col-md-6 mb-2">
+        <Form.Control
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+        />
+      </div>
+      <div className="col-12 mb-2">
+        <Button variant="primary" onClick={() => fetchingData()} className="w-100">
+          Fetch Data
+        </Button>
+      </div>
+    </div>
 
       {/* Title and Date Summary */}
       <div className="border p-3 mb-4 text-center">
