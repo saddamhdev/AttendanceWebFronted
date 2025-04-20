@@ -37,7 +37,7 @@ const AttendanceSheet = () => {
     };
 
     fetchData();
-  }, [startDate, endDate, employeeId]);
+  }, []);
 
   // Fetch Employees
   const fetchEmployees = useCallback(async () => {
@@ -59,7 +59,7 @@ const AttendanceSheet = () => {
 
   useEffect(() => {
     fetchEmployees();
-  }, [fetchEmployees]);
+  }, []);
 
   // Handle Employee Selection Change
   const handleUserChange = (e) => {
@@ -81,65 +81,99 @@ const exportData = async () => {
     alert("Export failed. Please check your internet or try again later.");
   }
 };
+const fetchingData = async () => {
+  if (!startDate || !endDate || !employeeId || new Date(startDate) > new Date(endDate)) return;
 
+  let requestId = ++latestRequestRef.current;
+  setLoading(true);
+
+  const fetchData = async () => {
+    try {
+      const response = await getAttendanceDataForAnyPeriod(employeeId, employeeName, startDate, endDate);
+      if (requestId === latestRequestRef.current) {
+       
+        setEmployees(Array.isArray(response) ? response : []);
+      }
+    } catch (error) {
+      console.error("Error fetching attendance data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchData();
+}
 return (
   <>
     <Navbar />
     <div className="container mt-4" style={{ paddingTop: "100px" }}>
-      {/* Date Range Filters */}
-      <div className="row mb-3">
-        <div className="col-12 col-md-6 mb-2">
-          <Form.Control
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-        </div>
-        <div className="col-12 col-md-6 mb-2">
-          <Form.Control
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </div>
-      </div>
+    <div className="row align-items-center mb-3">
+  {/* Start Date */}
+  <div className="col-12 col-md-2 mb-2">
+    <Form.Control
+      type="date"
+      value={startDate}
+      onChange={(e) => setStartDate(e.target.value)}
+    />
+  </div>
 
-      {/* Summary Header */}
-      <div className="border p-3 mb-4 text-center">
+  {/* End Date */}
+  <div className="col-12 col-md-2 mb-2">
+    <Form.Control
+      type="date"
+      value={endDate}
+      onChange={(e) => setEndDate(e.target.value)}
+    />
+  </div>
+
+  {/* Dropdown */}
+  <div className="col-12 col-md-3 mb-2">
+    <Form.Select
+      value={employeeName}
+      onChange={handleUserChange}
+      className="w-100"
+    >
+      {users.map((us) => (
+        <option key={us.idNumber} value={us.name}>
+          {us.name}
+        </option>
+      ))}
+    </Form.Select>
+  </div>
+
+   {/* Fetch Button */}
+   <div className="col-12 col-md-2 mb-2">
+    <Button
+      variant="primary"
+      onClick={() => fetchingData()}
+      className="w-100"
+    >
+      Fetch Data
+    </Button>
+  </div>
+
+  {/* Export Button */}
+  {checkAccessComponent("User", "Summary", "Export") && (
+    <div className="col-12 col-md-3 mb-2">
+      <Button
+        variant="dark"
+        onClick={exportData}
+        disabled={!employees || employees.length === 0}
+        className="w-100"
+      >
+        Export Data
+      </Button>
+    </div>
+  )}
+</div>
+
+
+       {/* Summary Header */}
+       <div className="border p-3 mb-4 text-center">
         <h5>Monthly Attendance Sheet</h5>
         <div className="row mt-2">
           <div className="col-6 text-start">Start Date: {startDate}</div>
           <div className="col-6 text-end">End Date: {endDate}</div>
         </div>
-      </div>
-
-      {/* User Dropdown & Export Button */}
-      <div className="row align-items-center mb-3">
-        <div className="col-12 col-md-6 mb-2">
-          <Form.Select
-            value={employeeName}
-            onChange={handleUserChange}
-            style={{ maxWidth: "100%" }}
-          >
-            {users.map((us) => (
-              <option key={us.idNumber} value={us.name}>
-                {us.name}
-              </option>
-            ))}
-          </Form.Select>
-        </div>
-        {checkAccessComponent("User", "Summary", "Export") && (
-          <div className="col-12 col-md-6 mb-2">
-            <Button
-              variant="dark"
-              onClick={exportData}
-              disabled={!employees || employees.length === 0}
-              className="w-100"
-            >
-              Export Data
-            </Button>
-          </div>
-        )}
       </div>
 
       {/* Attendance Table */}

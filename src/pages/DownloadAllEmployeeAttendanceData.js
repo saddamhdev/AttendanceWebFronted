@@ -82,27 +82,50 @@ return (
    <Navbar />
   <div className="container mt-4" style={{ paddingTop: "100px" }}>
     {/* Date Filters - Stacked on Mobile */}
-    <div className="row mb-3">
-      <div className="col-12 col-md-6 mb-2">
-        <Form.Control
-          type="date"
-          value={startDate}
-          onChange={(e) => setStartDate(e.target.value)}
-        />
-      </div>
-      <div className="col-12 col-md-6 mb-2">
-        <Form.Control
-          type="date"
-          value={endDate}
-          onChange={(e) => setEndDate(e.target.value)}
-        />
-      </div>
-      <div className="col-12 mb-2">
-        <Button variant="primary" onClick={() => fetchingData()} className="w-100">
-          Fetch Data
-        </Button>
-      </div>
+    <div className="row align-items-center mb-3">
+  {/* Start Date */}
+  <div className="col-12 col-md-3 mb-2">
+    <Form.Control
+      type="date"
+      value={startDate}
+      onChange={(e) => setStartDate(e.target.value)}
+    />
+  </div>
+
+  {/* End Date */}
+  <div className="col-12 col-md-3 mb-2">
+    <Form.Control
+      type="date"
+      value={endDate}
+      onChange={(e) => setEndDate(e.target.value)}
+    />
+  </div>
+
+  {/* Fetch Button */}
+  <div className="col-12 col-md-3 mb-2">
+    <Button 
+      variant="primary" 
+      onClick={() => fetchingData()} 
+      className="w-100"
+    >
+      Fetch Data
+    </Button>
+  </div>
+
+  {/* Export Button */}
+  {checkAccessComponent("Download", "DownloadAllEmployeeAttendanceData", "exportData") && (
+    <div className="col-12 col-md-3 mb-2">
+      <Button 
+        variant="dark" 
+        className="w-100" 
+        onClick={exportData}
+      >
+        Export Data
+      </Button>
     </div>
+  )}
+</div>
+
 
       {/* Title and Date Summary */}
       <div className="border p-3 mb-4 text-center">
@@ -117,14 +140,7 @@ return (
         </div>
       </div>
 
-      {/* Export Button */}
-      {checkAccessComponent("Download", "DownloadAllEmployeeAttendanceData", "exportData") && (
-        <div className="mb-3">
-          <Button variant="dark" className="w-100" onClick={exportData}>
-            Export Data
-          </Button>
-        </div>
-      )}
+     
 
       {/* Attendance Table - Scrollable on Mobile */}
       <div className="table-responsive mt-4">

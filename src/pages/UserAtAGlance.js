@@ -87,7 +87,7 @@ const AttendanceReport = () => {
     if (employeeId && employeeName && startDate && endDate) {
       fetchUserAtAGlanceData();
     }
-  }, [employeeId, employeeName, startDate, endDate]);
+  }, []);
 
   const exportData = async () => {
     setLoading(true);
@@ -95,38 +95,75 @@ const AttendanceReport = () => {
     setLoading(false);
     alert("Download successfully to Download directory");
   };
-
+  const fetchingData = async () => {
+    if (employeeId && employeeName && startDate && endDate) {
+      fetchUserAtAGlanceData();
+    }
+  }
   return (
     <>
       <Navbar />
       <Container className="mt-4" style={{ paddingTop: "100px" }}>
-        <Row className="mb-3 align-items-center">
-          <Col md={3}>
-            <Form.Control type="date" value={startDate} onChange={(e) => handleStartDateChange(e.target.value)} />
-          </Col>
-          <Col md={3}>
-            <Form.Control type="date" value={endDate} onChange={(e) => handleEndDateChange(e.target.value)} />
-          </Col>
-          <Col md={3}>
-            <Form.Select value={employeeName} className="me-2" onChange={handleUserChange}>
-              {employees.map((us, index) => (
-                <option key={index}>{us.name}</option>
-              ))}
-            </Form.Select>
-          </Col>
-          <Col md={3}>
+      <Row className="mb-3 align-items-center">
+  {/* Start Date */}
+  <Col xs={12} md={2} lg={2} className="mb-2 mb-md-0">
+    <Form.Control 
+      type="date" 
+      value={startDate} 
+      onChange={(e) => handleStartDateChange(e.target.value)} 
+    />
+  </Col>
 
-          {checkAccessComponent("User","UserAtAGlance","Export") && (
-            <>
-              <Button variant="dark" className="w-100" onClick={exportData}>
-              Export Data
-            </Button>
-              
-            </>
-          ) }
-            
-          </Col>
-        </Row>
+  {/* End Date */}
+  <Col xs={12} md={2} lg={2} className="mb-2 mb-md-0">
+    <Form.Control 
+      type="date" 
+      value={endDate} 
+      onChange={(e) => handleEndDateChange(e.target.value)} 
+    />
+  </Col>
+
+  {/* Employee Dropdown */}
+  <Col xs={12} md={3} className="mb-2 mb-md-0">
+  <Form.Select 
+    value={employeeName} 
+    onChange={handleUserChange}
+    style={{ minWidth: '250px' }} // or maxWidth / width
+  >
+    {employees.map((us, index) => (
+      <option key={index}>{us.name}</option>
+    ))}
+  </Form.Select>
+</Col>
+
+
+  <Col xs={12} md="auto" className="mb-2 mb-md-0">
+  <Button 
+    variant="primary" 
+    onClick={fetchingData}
+    className="px-4"
+    style={{ minWidth: '200px' }} // or maxWidth / width
+  >
+    Fetch Data
+  </Button>
+</Col>
+
+{checkAccessComponent("User", "UserAtAGlance", "Export") && (
+  <Col xs={12} md="auto" className="mb-2 mb-md-0">
+    <Button 
+      variant="dark" 
+      onClick={exportData}
+      className="px-4"
+      style={{ minWidth: '200px' }} // or maxWidth / width
+    >
+      Export Data
+    </Button>
+  </Col>
+)}
+
+</Row>
+
+
 
         {/* Loading Popup */}
         <Modal show={loading} centered>

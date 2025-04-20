@@ -68,7 +68,15 @@ const AttendanceSheet = () => {
     fetchEmployees();
   }, []);
 
-
+  useEffect(() => {
+    setEmployees(prevEmployees => 
+      prevEmployees.map(emp => ({
+        ...emp,
+        date: selectedDate
+      }))
+    );
+  }, [selectedDate]);
+  
   const handleInputChange = (e, index, field) => {
     const newEmployees = [...employees];
     newEmployees[index][field] = e.target.value;
@@ -76,6 +84,7 @@ const AttendanceSheet = () => {
   };
 
   const handleSubmit = async () => {
+   
     const response = await saveAttendance(employees);
     alert(response.message);
   };
@@ -85,29 +94,33 @@ const AttendanceSheet = () => {
       prevEmployees.map((emp) => ({ ...emp, status: newStatus }))
     );
   };
-  
+  const changeDate = (days) => {
+    if (!selectedDate) return;
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() + days);
+    setSelectedDate(newDate.toISOString().split("T")[0]);
+  };
   return (
     <>
     <Navbar />
   
     <div className="container mt-4" style={{ paddingTop: "100px" }}>
       {/* Date & Navigation */}
-      <div className="d-flex flex-wrap align-items-center mb-3 gap-2">
-        <Form.Control 
-          type="date" 
-          value={selectedDate} 
-          onChange={handleDateChange} 
-          className="me-2 flex-grow-1" 
-        />
-        <Button variant="secondary" className="me-2">{"<"}</Button>
-        <Form.Control 
-          type="text" 
-          value={formatDate(selectedDate)} 
-          readOnly 
-          className="me-2 flex-grow-1" 
-        />
-        <Button variant="secondary">{">"}</Button>
-      </div>
+      <div className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center mb-3 gap-2">
+          <Button variant="secondary" className="me-md-2" onClick={() => changeDate(-1)}>{"<"}</Button>
+          
+          <Form.Control 
+            type="date" 
+            value={selectedDate} 
+            onChange={handleDateChange} 
+            className="me-md-2 flex-grow-1" 
+          />  
+          
+          <Button variant="secondary" onClick={() => changeDate(1)}>{">"}</Button>
+        </div>
+
+
+
   
       {/* Header */}
       <div className="border p-3">
@@ -152,25 +165,27 @@ const AttendanceSheet = () => {
     {employees.map((employee, index) => (
       <tr key={employee.employeeId}>
         <td>{employee.employeeId}</td>
-        <td>{employee.name}</td>
+        <td style={{ minWidth: "120px" }}>{employee.name}</td>
         <td className="d-flex flex-column flex-sm-row">
           <Form.Control
             type="text"
             value={employee.startHour}
             onChange={(e) => handleInputChange(e, index, "startHour")}
             className="mb-2 mb-sm-0 me-sm-1 w-100 w-sm-50"
+            style={{ minWidth: "50px",maxWidth: "80px" }}
           />
           <Form.Control
             type="text"
             value={employee.startMinute}
             onChange={(e) => handleInputChange(e, index, "startMinute")}
             className="mb-2 mb-sm-0 me-sm-1 w-100 w-sm-50"
+            style={{ minWidth: "50px",maxWidth: "80px" }}
           />
           <Form.Select
             value={employee.startPeriod}
             onChange={(e) => handleInputChange(e, index, "startPeriod")}
             className="w-100 w-sm-50"
-            style={{ minWidth: "80px" }} // Ensure it's wide enough for text
+            style={{ minWidth: "80px",maxWidth: "80px" }} // Ensure it's wide enough for text
           >
             <option>AM</option>
             <option>PM</option>
@@ -182,7 +197,7 @@ const AttendanceSheet = () => {
             value={employee.lateEntryReason}
             onChange={(e) => handleInputChange(e, index, "lateEntryReason")}
             className="w-100"
-            style={{ minWidth: "140px" }}
+            style={{ minWidth: "100px" }}
           />
         </td>
         <td className="d-flex flex-column flex-sm-row">
@@ -191,18 +206,20 @@ const AttendanceSheet = () => {
             value={employee.exitHour}
             onChange={(e) => handleInputChange(e, index, "exitHour")}
             className="mb-2 mb-sm-0 me-sm-1 w-100 w-sm-50"
+            style={{ minWidth: "50px",maxWidth: "80px" }}
           />
           <Form.Control
             type="text"
             value={employee.exitMinute}
             onChange={(e) => handleInputChange(e, index, "exitMinute")}
             className="mb-2 mb-sm-0 me-sm-1 w-100 w-sm-50"
+            style={{ minWidth: "50px",maxWidth: "80px" }}
           />
           <Form.Select
             value={employee.exitPeriod}
             onChange={(e) => handleInputChange(e, index, "exitPeriod")}
             className="w-100 w-sm-50"
-            style={{ minWidth: "80px" }} // Ensure it's wide enough for text
+            style={{ minWidth: "80px",maxWidth: "80px" }} // Ensure it's wide enough for text
           >
             <option>AM</option>
             <option>PM</option>
@@ -214,7 +231,7 @@ const AttendanceSheet = () => {
             value={employee.earlyExitReason}
             onChange={(e) => handleInputChange(e, index, "earlyExitReason")}
             className="w-100"
-            style={{ minWidth: "140px" }}
+            style={{ minWidth: "100px" }}
           />
         </td>
         <td className="d-flex flex-column flex-sm-row">
@@ -223,14 +240,14 @@ const AttendanceSheet = () => {
             value={employee.outHour}
             onChange={(e) => handleInputChange(e, index, "outHour")}
             className="mb-2 mb-sm-0 me-sm-1 w-100 w-sm-50"
-            style={{ minWidth: "80px" }}
+            style={{ minWidth: "50px" }}
           />
           <Form.Control
             type="text"
             value={employee.outMinute}
             onChange={(e) => handleInputChange(e, index, "outMinute")}
             className="mb-2 mb-sm-0 me-sm-1 w-100 w-sm-50"
-            style={{ minWidth: "80px" }}
+            style={{ minWidth: "50px" }}
           />
         </td>
         <td>
