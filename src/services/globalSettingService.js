@@ -5,9 +5,9 @@ const BASE_URL_GLOBAL_SETTING = process.env.REACT_APP_API_URL_Attendance || `htt
 
 const API_URL = `${BASE_URL_GLOBAL_SETTING}/api/globalSetting/insert`;
 const GET_API_URL = `${BASE_URL_GLOBAL_SETTING}/api/globalSetting/getAll`;
-const Delete_API_URL = `${BASE_URL_GLOBAL_SETTING}/api/globalSetting/delete`;
+const Delete_API_URL = `${BASE_URL_GLOBAL_SETTING}/api/globalSetting/del`;
 const Update_API_URL = `${BASE_URL_GLOBAL_SETTING}/api/globalSetting/update`;
-
+const UpdateDel_API_URL = `${BASE_URL_GLOBAL_SETTING}/api/globalSetting/updateDel`;
 const formatCurrentTime = () => {
   const now = new Date();
   const year = now.getFullYear();
@@ -25,7 +25,7 @@ const addGlobalSettingData = async (GlobalSettingData) => {
     const updatedGlobalSettingData = {
       ...GlobalSettingData,
       currentTime: formatCurrentTime(),
-      status: "1", 
+      status: "1",
     };
 
     const response = await axios.post(API_URL, updatedGlobalSettingData, {
@@ -34,13 +34,24 @@ const addGlobalSettingData = async (GlobalSettingData) => {
         "Content-Type": "application/json",
       },
     });
+
+    if (response.data === "Successfully inserted") {
+      alert("Data inserted successfully!");
+    } else {
+      alert("Server responded: " + response.data);
+    }
+
     return response.data;
   } catch (error) {
+    console.error("Error inserting global setting data:", error);
+    alert("Failed to insert data. Please try again.");
     throw error;
   }
 };
 
-const updateGlobalData = async (rowId,GlobalSettingData) => {
+
+
+const updateGlobalData = async (rowId, GlobalSettingData) => {
   try {
     const updatedGlobalSettingData = {
       ...GlobalSettingData,
@@ -55,10 +66,47 @@ const updateGlobalData = async (rowId,GlobalSettingData) => {
         "Content-Type": "application/json",
       },
     });
-    alert(response.data);
+
+    if (response.data === "Successfully updated") {
+      alert("Data updated successfully!");
+    } else {
+      alert("Server responded: " + response.data);
+    }
+
     return response.data;
   } catch (error) {
-    throw error;
+    console.error("Error updating global setting data:", error);
+    alert("Failed to update data. Please try again.");
+    throw error; // Still throw to handle elsewhere if needed
+  }
+};
+const updateGlobalDataDEl = async (rowId, GlobalSettingData) => {
+  try {
+    const updatedGlobalSettingData = {
+      ...GlobalSettingData,
+      currentTime: formatCurrentTime(),
+      status: "1", 
+      rowId: rowId,
+    };
+
+    const response = await axios.post(UpdateDel_API_URL, updatedGlobalSettingData, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.data === "Successfully updated") {
+      alert("Data updated successfully!");
+    } else {
+      alert("Server responded: " + response.data);
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating global setting data:", error);
+    alert("Failed to update data. Please try again.");
+    throw error; // Still throw to handle elsewhere if needed
   }
 };
 
@@ -76,19 +124,7 @@ const getAllGlobalData = async (status) => {
   }
 };
 
-const deleteGlobalData = async (row) => {
-  try {
-    const response = await axios.delete(Delete_API_URL, {
-      data: row,
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
 
-export { addGlobalSettingData, getAllGlobalData, deleteGlobalData ,updateGlobalData};
+
+
+export { addGlobalSettingData, getAllGlobalData, updateGlobalDataDEl ,updateGlobalData};

@@ -48,10 +48,15 @@ const DataTable = () => {
 
   const handleNewButtonClick = () => {
     let startDate;
-    if (rows.length > 0) {
-      const firstRowDate = new Date(rows[0].formattedDeathDate);
+    const matchingRows = rows.filter(row => row.name === selectedParson);
+    if (matchingRows.length > 0) {
+      // print table data in console not rows
+      const firstRowDate = new Date(matchingRows[0].formattedDeathDate);
+      console.log(firstRowDate);
       startDate = new Date(firstRowDate);
       startDate.setDate(startDate.getDate() + 1);
+
+      console.log(startDate);
     } else {
       startDate = new Date(); // Default to today if no rows exist
     }
@@ -106,25 +111,13 @@ const DataTable = () => {
           alert("Error: Missing ID for updating the row.");
           return;
         }
-        console.log("Editing Row:", newRow);
-        
+       
         const response = await updateLocalSettingData(newRow);
         
-        if (response.status === 200) {
-          alert("Successfully updated!");
-        } else {
-          alert(`Update failed: ${response.statusText}`);
-        }
+       
       } else {
         // Add new row
         const response = await addLocalSettingData(newRow);
-
-        if (response.ok) {
-          alert("Successfully added!");
-        } else {
-          const errorMessage = await response.text(); // Get detailed error message
-          alert(`Add failed: ${response.status} - ${errorMessage}`);
-        }
 
       }
       

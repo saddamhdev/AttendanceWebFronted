@@ -36,11 +36,25 @@ const addLocalSettingData = async (LocalSettingData) => {
         "Content-Type": "application/json",
       },
     });
+
+    if (response.data === "Successfully inserted") {
+      alert("Data inserted successfully!");
+    } else {
+      alert("Warning: " + response.data);
+    }
+
     return response.data;
+
   } catch (error) {
-    throw error;
+    if (error.response && error.response.data) {
+      alert("Error: " + error.response.data);
+    } else {
+      alert("An unexpected error occurred while adding data.");
+    }
+    return null;
   }
 };
+
 
 const getAllLocalData = async (status) => {
   try {
@@ -63,11 +77,28 @@ const updateLocalSettingData = async (row) => {
         Authorization: `Bearer ${getToken()}`,
       },
     });
+
+    // Check success response message from backend
+    if (response.data === "Successfully updated") {
+      alert("Data updated successfully!");
+    } else {
+      alert("Warning: " + response.data);
+    }
+
     return response.data;
+
   } catch (error) {
-    throw error;
+    // If backend sends a message (e.g., from ResponseEntity.body)
+    if (error.response && error.response.data) {
+      alert("Error: " + error.response.data);
+    } else {
+      alert("An unexpected error occurred while inserting data.");
+    }
+
+    return null;
   }
 };
+
 
 const deleteLocalData = async (row) => {
   try {

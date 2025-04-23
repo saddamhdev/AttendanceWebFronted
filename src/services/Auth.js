@@ -53,7 +53,7 @@ const checkAndRefreshToken = async () => {
           const response = await axios.post(API_URL_REFRESH, { refreshToken });
 
           if (response.data.accessToken) {
-              console.log("New access token received:", response.data.accessToken);
+              //console.log("New access token received:", response.data.accessToken);
 
               localStorage.setItem("authToken", response.data.accessToken);
               localStorage.setItem("roleData", response.data.Role);

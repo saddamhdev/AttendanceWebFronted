@@ -125,8 +125,8 @@ const deleteRole = async (id) => {
   };
   const updateRole = async (data) => {
     try {
-      const token = await getToken();  // ✅ Ensure token is being fetched properly
-      console.log("Token:", token);  // Debug: Check if token is being fetched correctly
+      const token =  getToken();  // ✅ Ensure token is being fetched properly
+     // console.log("Token:", token);  // Debug: Check if token is being fetched correctly
   
       const response = await axios.post(API_URL_Update, data, {
         headers: { 

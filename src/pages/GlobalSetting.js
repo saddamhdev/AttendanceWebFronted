@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Table, Button, Form, Modal } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import Navbar from "../layouts/Navbar";
-import { addGlobalSettingData, getAllGlobalData, updateGlobalData, deleteGlobalData } from "../services/globalSettingService";
+import { addGlobalSettingData, getAllGlobalData, updateGlobalData, updateGlobalDataDEl } from "../services/globalSettingService";
 import { checkAccessComponent } from "../utils/accessControl";
 
 const DataTable = () => {
@@ -89,8 +89,9 @@ const DataTable = () => {
   };
 
   const deleteRow = async (row, index) => {
+    
     try {
-      await deleteGlobalData(row.id);
+      await updateGlobalDataDEl(row.id,row);
       fetchGlobalData();
     } catch (error) {
       console.error("Error deleting global data:", error);
