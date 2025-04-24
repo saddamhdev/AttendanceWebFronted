@@ -26,8 +26,18 @@ const AttendanceSheet = () => {
       try {
         const response = await getAttendanceDataForAnyPeriod(employeeId, employeeName, startDate, endDate);
         if (requestId === latestRequestRef.current) {
-         
-          setEmployees(Array.isArray(response) ? response : []);
+           console.log("Response:", response); // Log the response for debugging
+          if (Array.isArray(response)) {
+            const sortedData = response.sort((a, b) => {
+              const dateA = new Date(a.date); // Assuming your date key is named "date"
+              const dateB = new Date(b.date);
+              return dateA - dateB;
+            });
+            setEmployees(sortedData);
+          } else {
+            setEmployees([]);
+          }
+          
         }
       } catch (error) {
         console.error("Error fetching attendance data:", error);
