@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Button, Form, Modal, Spinner, Collapse, Table } from "react-bootstrap";
-import { addEmployee, deleteEmployee, getAllEmployees, addEmployeePage,addEmployeeComponent } from "../services/DeveloperService";
+import {  deleteEmployee, getAllEmployees, addEmployeeComponent } from "../services/DeveloperService";
 import Navbar from "../layouts/Navbar";
 
 const EmployeeManagement = () => {

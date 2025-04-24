@@ -1,6 +1,6 @@
 import React from "react";
 import AppRoutes from "./routes/AppRoutes";
-import {getToken, isTokenExpired, checkAndRefreshToken, handleSessionExpiry } from "./services/Auth";
+import { isTokenExpired, checkAndRefreshToken } from "./services/Auth";
 import { useEffect ,useState } from "react";
 
 const App = () => {
