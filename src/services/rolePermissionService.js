@@ -15,7 +15,7 @@ const GET_API_URL_SINGLE_ROLE_DATA = `${BASE_URL_ROLE}/api/role/getSingleRoleDat
 const GET_API_URL_USERS = `${BASE_URL_ROLE}/api/user/getAll`;
 const GET_API_URL_ROLE = `${BASE_URL_ROLE}/api/role/getAllRole`;
 const API_URL_AssignPermission = `${BASE_URL_ROLE}/api/role/assignPermission`;
-const Delete_API_URL = `${BASE_URL_ROLE}/api/user/delete`;
+
 
 // Fetch the token from the backend
 const addEmployee = async (employeeData) => {
