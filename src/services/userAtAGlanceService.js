@@ -22,19 +22,7 @@ const getAllAtAGlanceData = async (employeeId, employeeName, startDate, endDate)
   }
 };
 
-const exportAtAGlanceData1 = async (AtAGlanceData) => {
-  try {
-    const response = await axios.post(EXPORT_API_URL, AtAGlanceData, {
-      headers: {
-        Authorization: `Bearer ${getToken()}`,
-        "Content-Type": "application/json",
-      },
-    });
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-};
+
 
 const exportAtAGlanceData = async (AtAGlanceData) => {
   try {
