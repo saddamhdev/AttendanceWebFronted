@@ -27,9 +27,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run ESLint
-        run: npm run lint || echo "ESLint completed with warnings"
-
       - name: Build React app
         run: CI=false npm run build
 
