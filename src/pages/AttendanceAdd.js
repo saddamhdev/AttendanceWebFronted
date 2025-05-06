@@ -45,11 +45,11 @@ const AttendanceSheet = () => {
             date: selectedDate,
             employeeId: emp.idNumber, // Fixed syntax error
             name: emp.name,
-            startHour: "9",
+            startHour: "10",
             startMinute: "0",
             lateEntryReason: "",
             startPeriod: "AM",
-            exitHour: "5",
+            exitHour: "6",
             exitMinute: "0",
             exitPeriod: "PM",
             earlyExitReason:"",
@@ -66,16 +66,9 @@ const AttendanceSheet = () => {
       }
     };
     fetchEmployees();
-  }, []);
-
-  useEffect(() => {
-    setEmployees(prevEmployees => 
-      prevEmployees.map(emp => ({
-        ...emp,
-        date: selectedDate
-      }))
-    );
   }, [selectedDate]);
+
+
   
   const handleInputChange = (e, index, field) => {
     const newEmployees = [...employees];
