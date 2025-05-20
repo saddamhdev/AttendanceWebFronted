@@ -67,7 +67,9 @@ const AttendanceSheet = () => {
     }
   }, []);
 
-  
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
 
   // Handle Employee Selection Change
   const handleUserChange = (e) => {
