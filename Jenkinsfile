@@ -2,21 +2,26 @@ pipeline {
     agent any
 
     environment {
-        SSH_KEY    = credentials('DO_SSH_KEY_ID')       // Jenkins credential ID for private key
-        DO_HOST    = credentials('DO_HOST')              // IP or domain of the server
-        DO_USER    = credentials('DO_USER')              // SSH user
-        REMOTE_DIR = '/www/wwwroot/snvn.deepseahost.com/reactjs'
+        SSH_KEY     = credentials('DO_SSH_KEY_ID')       // Jenkins SSH private key credential ID
+        DO_HOST     = credentials('DO_HOST')             // DigitalOcean server IP or domain
+        DO_USER     = credentials('DO_USER')             // SSH username
+        REMOTE_DIR  = '/www/wwwroot/snvn.deepseahost.com/reactjs'
         NODE_VERSION = '22.13.1'
-        PORT = '3082'
+        PORT        = '3082'
     }
 
     parameters {
         booleanParam(name: 'DEPLOY', defaultValue: false, description: 'Deploy to server after build?')
     }
 
+    options {
+        timestamps()
+    }
+
     stages {
         stage('Checkout') {
             steps {
+                echo '📥 Checking out source code...'
                 checkout scm
             }
         }
@@ -26,30 +31,37 @@ pipeline {
                 script {
                     def nodeHome = tool name: "node-${NODE_VERSION}", type: 'NodeJSInstallation'
                     env.PATH = "${nodeHome}/bin:${env.PATH}"
+                    echo "🛠 Using Node.js ${NODE_VERSION}"
                 }
             }
         }
 
         stage('Install Dependencies') {
             steps {
+                echo '📦 Installing dependencies using npm ci...'
                 sh 'npm ci'
             }
         }
 
         stage('Run ESLint') {
             steps {
-                sh 'npm run lint || echo "ESLint completed with warnings"'
+                echo '🔍 Running ESLint...'
+                sh '''
+                    npm run lint || echo "⚠️ ESLint completed with warnings (ignored)"
+                '''
             }
         }
 
         stage('Build React App') {
             steps {
+                echo '🛠 Building React application...'
                 sh 'CI=false npm run build'
             }
         }
 
         stage('Archive Build') {
             steps {
+                echo '📦 Creating build archive...'
                 sh 'tar czf build.tar.gz -C build .'
             }
         }
@@ -68,59 +80,69 @@ pipeline {
                         allowAnyHosts: true
                     ]
 
-                    // Kill running process and backup old build
-                    sshCommand remote: remote, command: """
-                        echo '🔪 Killing process on port ${PORT}...'
-                        PID=\$(lsof -t -i:${PORT})
-                        if [ -n "\$PID" ]; then
-                            kill -9 \$PID && echo '✅ Process killed.'
-                        else
-                            echo '⚠️ No process running.'
-                        fi
+                    try {
+                        echo '🔐 Connecting and deploying to remote server...'
 
-                        cd ${REMOTE_DIR}
-                        echo '📦 Backing up old build...'
-                        mv build build.bak || echo 'No previous build found.'
-                    """
+                        sshCommand remote: remote, command: """
+                            echo '🔪 Killing process on port ${PORT}...'
+                            PID=\$(lsof -t -i:${PORT})
+                            if [ -n "\$PID" ]; then
+                                kill -9 \$PID && echo '✅ Process killed.'
+                            else
+                                echo '⚠️ No process running.'
+                            fi
 
-                    // Upload and extract build
-                    sshPut remote: remote, from: 'build.tar.gz', into: "${REMOTE_DIR}/"
+                            cd ${REMOTE_DIR}
+                            echo '📦 Backing up old build...'
+                            rm -rf build.bak
+                            mv build build.bak || echo 'No previous build found.'
+                        """
 
-                    sshCommand remote: remote, command: """
-                        cd ${REMOTE_DIR}
-                        mkdir -p build
-                        tar xzf build.tar.gz -C build
-                        rm build.tar.gz
-                        echo '✅ Build extracted.'
-                    """
+                        echo '📤 Uploading build archive...'
+                        sshPut remote: remote, from: 'build.tar.gz', into: "${REMOTE_DIR}/"
 
-                    // Start the React app
-                    sshCommand remote: remote, command: """
-                        cd ${REMOTE_DIR}/build
-                        echo '🚀 Starting app on port ${PORT}...'
-                        nohup npx serve -s . -l ${PORT} > serve.log 2>&1 &
-                        echo '✅ App started.'
-                    """
+                        sshCommand remote: remote, command: """
+                            cd ${REMOTE_DIR}
+                            mkdir -p build
+                            tar xzf build.tar.gz -C build
+                            rm build.tar.gz
+                            echo '✅ Build extracted.'
+                        """
 
-                    // Rollback if build directory doesn't exist
-                    sshCommand remote: remote, command: """
-                        cd ${REMOTE_DIR}
-                        if [ ! -d build ]; then
-                            echo '❌ Deployment failed. Rolling back...'
-                            mv build.bak build
-                            echo '🔁 Rollback complete.'
-                        else
-                            echo '✅ Deployment successful.'
-                        fi
-                    """
+                        echo '🚀 Starting React app on port ${PORT}...'
+                        sshCommand remote: remote, command: """
+                            cd ${REMOTE_DIR}/build
+                            nohup npx serve -s . -l ${PORT} > serve.log 2>&1 &
+                            echo '✅ App started.'
+                        """
+
+                        echo '✅ Verifying deployment...'
+                        sshCommand remote: remote, command: """
+                            cd ${REMOTE_DIR}
+                            if [ ! -d build ]; then
+                                echo '❌ Deployment failed. Rolling back...'
+                                mv build.bak build
+                                echo '🔁 Rollback complete.'
+                            else
+                                echo '✅ Deployment successful.'
+                            fi
+                        """
+
+                    } catch (Exception e) {
+                        echo "❌ Deployment failed with error: ${e.message}"
+                        currentBuild.result = 'FAILURE'
+                    } finally {
+                        echo '🧹 Cleaning up build archive...'
+                        sh 'rm -f build.tar.gz'
+                    }
                 }
             }
         }
     }
 
     post {
-        cleanup {
-            sh 'rm -f build.tar.gz'
+        always {
+            echo '📄 Pipeline execution finished.'
         }
     }
 }
