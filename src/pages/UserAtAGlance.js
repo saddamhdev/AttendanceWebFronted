@@ -83,11 +83,7 @@ const AttendanceReport = () => {
     setLoading(false);
   };
 
-  useEffect(() => {
-    if (employeeId && employeeName && startDate && endDate) {
-      fetchUserAtAGlanceData();
-    }
-  }, []);
+  
 
   const exportData = async () => {
     setLoading(true);
