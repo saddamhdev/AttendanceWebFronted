@@ -6,7 +6,7 @@ pipeline {
         DO_HOST     = credentials('DO_HOST')             // DigitalOcean server IP or domain
         DO_USER     = credentials('DO_USER')             // SSH username
         REMOTE_DIR  = '/www/wwwroot/snvn.deepseahost.com/reactjs'
-        NODE_VERSION = '22.14.0'
+        NODE_VERSION = 'node-22.14.0'
         PORT        = '3082'
     }
 
