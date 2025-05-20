@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        SSH_KEY = credentials('DO_SSH_KEY_ID')       // Jenkins secret text or SSH key (use credentials plugin)
-        DO_HOST = credentials('DO_HOST')
-        DO_USER = credentials('DO_USER')
+        SSH_KEY    = credentials('DO_SSH_KEY_ID')       // Jenkins credential ID for private key
+        DO_HOST    = credentials('DO_HOST')              // IP or domain of the server
+        DO_USER    = credentials('DO_USER')              // SSH user
         REMOTE_DIR = '/www/wwwroot/snvn.deepseahost.com/reactjs'
         NODE_VERSION = '22.13.1'
         PORT = '3082'
@@ -24,7 +24,6 @@ pipeline {
         stage('Setup Node.js') {
             steps {
                 script {
-                    // Use NodeJS plugin if installed
                     def nodeHome = tool name: "node-${NODE_VERSION}", type: 'NodeJSInstallation'
                     env.PATH = "${nodeHome}/bin:${env.PATH}"
                 }
@@ -43,13 +42,19 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build React App') {
             steps {
                 sh 'CI=false npm run build'
             }
         }
 
-        stage('Deploy') {
+        stage('Archive Build') {
+            steps {
+                sh 'tar czf build.tar.gz -C build .'
+            }
+        }
+
+        stage('Deploy to Server') {
             when {
                 expression { params.DEPLOY }
             }
@@ -63,15 +68,12 @@ pipeline {
                         allowAnyHosts: true
                     ]
 
-                    // Save the build
-                    sh 'tar czf build.tar.gz -C build .'
-
-                    // Kill process, backup old build, and upload new one
-                    sshCommand remote: remote, command: '''
-                        echo '🔪 Killing process on port 3082...'
-                        PID=$(lsof -t -i:3082)
-                        if [ -n "$PID" ]; then
-                            kill -9 $PID && echo '✅ Process killed.'
+                    // Kill running process and backup old build
+                    sshCommand remote: remote, command: """
+                        echo '🔪 Killing process on port ${PORT}...'
+                        PID=\$(lsof -t -i:${PORT})
+                        if [ -n "\$PID" ]; then
+                            kill -9 \$PID && echo '✅ Process killed.'
                         else
                             echo '⚠️ No process running.'
                         fi
@@ -79,28 +81,29 @@ pipeline {
                         cd ${REMOTE_DIR}
                         echo '📦 Backing up old build...'
                         mv build build.bak || echo 'No previous build found.'
-                    '''
+                    """
 
+                    // Upload and extract build
                     sshPut remote: remote, from: 'build.tar.gz', into: "${REMOTE_DIR}/"
 
-                    sshCommand remote: remote, command: '''
+                    sshCommand remote: remote, command: """
                         cd ${REMOTE_DIR}
                         mkdir -p build
                         tar xzf build.tar.gz -C build
                         rm build.tar.gz
-                        echo '✅ Build uploaded.'
-                    '''
+                        echo '✅ Build extracted.'
+                    """
 
-                    // Start server
-                    sshCommand remote: remote, command: '''
+                    // Start the React app
+                    sshCommand remote: remote, command: """
                         cd ${REMOTE_DIR}/build
-                        echo '🚀 Starting app on port 3082...'
-                        nohup npx serve -s . -l 3082 > serve.log 2>&1 &
+                        echo '🚀 Starting app on port ${PORT}...'
+                        nohup npx serve -s . -l ${PORT} > serve.log 2>&1 &
                         echo '✅ App started.'
-                    '''
+                    """
 
-                    // Rollback if failed
-                    sshCommand remote: remote, command: '''
+                    // Rollback if build directory doesn't exist
+                    sshCommand remote: remote, command: """
                         cd ${REMOTE_DIR}
                         if [ ! -d build ]; then
                             echo '❌ Deployment failed. Rolling back...'
@@ -109,7 +112,7 @@ pipeline {
                         else
                             echo '✅ Deployment successful.'
                         fi
-                    '''
+                    """
                 }
             }
         }
