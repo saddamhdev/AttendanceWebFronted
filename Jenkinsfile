@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        SSH_KEY     = credentials('DO_SSH_KEY_ID')       // Jenkins SSH private key credential ID
+        SSH_KEY = credentials('DO_SSH_KEY')       // Jenkins SSH private key credential ID
         DO_HOST     = credentials('DO_HOST')             // DigitalOcean server IP or domain
         DO_USER     = credentials('DO_USER')             // SSH username
         REMOTE_DIR  = '/www/wwwroot/snvn.deepseahost.com/reactjs'
