@@ -27,6 +27,7 @@ const Login = () => {
       if (response?.result === "Authenticated") {
        
         localStorage.setItem("roleData", response.Role);
+       // console.log("Role Data:", response.Role); // Log role data for debugging
         setRoleData(response.Role); // Set roleData in context
 
         const sessionExpiryTime = Date.now() + 10 * 60 * 1000; // Set expiry (10 minutes)
@@ -34,8 +35,14 @@ const Login = () => {
         localStorage.setItem("refreshToken", response.refreshToken);
         sessionStorage.setItem("isAuthenticated", "true");
         sessionStorage.setItem("expiry", sessionExpiryTime); // Store expiry time
+        //localStorage.setItem("userId", email);
+        localStorage.setItem("userName", response.Name);
+        if (response.Role === "NoRole") {
+          navigate("/SinglePage");
+        }else{
+          navigate("/AttendanceAdd");
 
-        navigate("/AttendanceAdd");
+        }
       } else {
         setError("⚠️ Invalid credentials. Please try again.");
       }

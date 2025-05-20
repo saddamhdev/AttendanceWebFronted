@@ -3,6 +3,8 @@ import {getToken} from "./Auth";
 const BASE_URL_USER_AT_A_GLANCE = process.env.REACT_APP_API_URL_Attendance || `http://${window.location.hostname}:8181`;
 
 const GET_API_URL = `${BASE_URL_USER_AT_A_GLANCE}/api/userAtAGlance/getAll`;
+const GET_API_URL_Single = `${BASE_URL_USER_AT_A_GLANCE}/api/userAtAGlance/getAllSingle`;
+
 const EXPORT_API_URL = `${BASE_URL_USER_AT_A_GLANCE}/api/userAtAGlance/exportAtAGlanceData`;
 
 
@@ -22,6 +24,20 @@ const getAllAtAGlanceData = async (employeeId, employeeName, startDate, endDate)
   }
 };
 
+// Function to retrieve user attendance data with filters
+const getAllAtAGlanceDataSingle = async (  startDate, endDate) => {
+  try {
+    const response = await axios.get(GET_API_URL_Single, {
+      params: {  startDate, endDate }, 
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
 
 
 const exportAtAGlanceData = async (AtAGlanceData) => {
@@ -73,4 +89,4 @@ const exportAtAGlanceData = async (AtAGlanceData) => {
     return false;
   }
 };
-export { getAllAtAGlanceData, exportAtAGlanceData };
+export { getAllAtAGlanceData, exportAtAGlanceData,getAllAtAGlanceDataSingle };

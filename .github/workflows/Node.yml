@@ -3,7 +3,7 @@ name: React CI + Deploy With RollBack
 on:
   push:
     branches:
-      - main
+      - nvn
   workflow_dispatch:
     inputs:
       deploy:

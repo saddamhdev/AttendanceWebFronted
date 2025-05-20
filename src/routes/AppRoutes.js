@@ -22,12 +22,15 @@ import Permission from "../Owner/Permission";
 import AssignPermission from "../Owner/AssignPermission";
 import UpdatePermission from "../Owner/UpdatePermission";
 import { RoleProvider } from "../context/RoleContext";  // Import RoleProvider
-
-
+import SinglePage from "../layouts/SinglePage";
+import { ThemeProvider } from "../context/ThemeContext"; // Import ThemeProvider
+import UserAtAGlanceSingle from "../pages/UserAtAGlanceSingle";
 function App() {
   return (
   
     <Router>
+       <ThemeProvider> {/* Wrap the app with ThemeProvider */}
+
         <RoleProvider> 
       <Routes>
         {/* Public Route */}
@@ -53,8 +56,12 @@ function App() {
         <Route path="/Permission" element={<ProtectedRoute><Permission /></ProtectedRoute>} />
         <Route path="/AssignPermission" element={<ProtectedRoute><AssignPermission /></ProtectedRoute>} />
         <Route path="/UpdatePermission" element={<ProtectedRoute><UpdatePermission /></ProtectedRoute>} />
+        <Route path="/SinglePage" element={<ProtectedRoute><SinglePage /></ProtectedRoute>} />
+        <Route path="/UserAtAGlanceSingle" element={<ProtectedRoute><UserAtAGlanceSingle /></ProtectedRoute>} />
+
       </Routes>
       </RoleProvider>
+      </ThemeProvider> {/* Close ThemeProvider */}
     </Router>
     
   );
