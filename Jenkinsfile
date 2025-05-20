@@ -2,12 +2,13 @@ pipeline {
     agent any
 
     environment {
-        SSH_KEY = credentials('DO_SSH_KEY')       // Jenkins SSH private key credential ID
-        DO_HOST     = credentials('DO_HOST')             // DigitalOcean server IP or domain
-        DO_USER     = credentials('DO_USER')             // SSH username
+        SSH_KEY     = credentials('DO_SSH_KEY')
+        DO_HOST     = credentials('DO_HOST')
+        DO_USER     = credentials('DO_USER')
         REMOTE_DIR  = '/www/wwwroot/snvn.deepseahost.com/reactjs'
         NODE_VERSION = '22.14.0'
         PORT        = '3082'
+        NVM_DIR     = "${WORKSPACE}/.nvm"
     }
 
     parameters {
@@ -26,27 +27,37 @@ pipeline {
             }
         }
 
-        stage('Setup Node.js') {
+        stage('Install Node.js via NVM') {
             steps {
-                script {
-                    def nodeHome = tool name: "node-${NODE_VERSION}", type: 'NodeJSInstallation'
-                    env.PATH = "${nodeHome}/bin:${env.PATH}"
-                    echo "🛠 Using Node.js ${NODE_VERSION}"
-                }
+                echo "📦 Installing Node.js ${NODE_VERSION} via NVM..."
+                sh '''
+                    export NVM_DIR="${NVM_DIR}"
+                    mkdir -p "$NVM_DIR"
+                    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+                    . "$NVM_DIR/nvm.sh"
+                    nvm install ${NODE_VERSION}
+                    nvm use ${NODE_VERSION}
+                    node -v
+                    npm -v
+                '''
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                echo '📦 Installing dependencies using npm ci...'
-                sh 'npm ci'
+                sh '''
+                    . "${NVM_DIR}/nvm.sh"
+                    nvm use ${NODE_VERSION}
+                    npm ci
+                '''
             }
         }
 
         stage('Run ESLint') {
             steps {
-                echo '🔍 Running ESLint...'
                 sh '''
+                    . "${NVM_DIR}/nvm.sh"
+                    nvm use ${NODE_VERSION}
                     npm run lint || echo "⚠️ ESLint completed with warnings (ignored)"
                 '''
             }
@@ -54,8 +65,11 @@ pipeline {
 
         stage('Build React App') {
             steps {
-                echo '🛠 Building React application...'
-                sh 'CI=false npm run build'
+                sh '''
+                    . "${NVM_DIR}/nvm.sh"
+                    nvm use ${NODE_VERSION}
+                    CI=false npm run build
+                '''
             }
         }
 
