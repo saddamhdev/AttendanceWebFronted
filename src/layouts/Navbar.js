@@ -3,6 +3,7 @@ import { Menu, X, Search } from "lucide-react";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import Bootstrap CSS
 import "../assets/Navbar.css"; // Import custom CSS
 import { checkAccessComponent, checkAccess, checkAccessMenu } from "../utils/accessControl";
+import { LogOut } from "lucide-react";
 
 
 const Navbar = () => {
@@ -140,6 +141,19 @@ const Navbar = () => {
               />
             </div>
           </form>
+          {/* Logout Button/Icon */}
+            <button
+              className="btn btn-outline-light d-flex align-items-center ms-3"
+              onClick={() => {
+                // Clear session/local storage if needed
+                localStorage.clear();
+                sessionStorage.clear();
+                window.location.href = "/"; // Redirect to login page
+              }}
+            >
+              <LogOut size={18} className="me-1" />
+              Logout
+            </button>
         </div>
       </div>
     </nav>
