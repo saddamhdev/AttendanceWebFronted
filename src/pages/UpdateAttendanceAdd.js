@@ -47,10 +47,84 @@ const AttendanceSheet = () => {
   };
   
   const handleInputChange = (e, index, field) => {
-    const newEmployees = [...employees];
-    newEmployees[index][field] = e.target.value;
-    setEmployees(newEmployees);
-  };
+  const newEmployees = [...employees];
+  let value = e.target.value;
+
+  // 🔹 Start Hour Logic
+  if (field === "startHour") {
+    newEmployees[index][field] = value;
+    const hour = parseInt(value, 10);
+    if (!isNaN(hour)) {
+      if (hour >= 6 && hour <= 11) {
+        newEmployees[index].startPeriod = "AM";
+      } else {
+        newEmployees[index].startPeriod = "PM";
+      }
+    }
+  }
+
+  // 🔹 Exit Hour Logic
+  else if (field === "exitHour") {
+    const hour = parseInt(value, 10);
+
+    if (!isNaN(hour)) {
+      // Case: 12
+      if (hour === 12) {
+        if (newEmployees[index].exitPeriod === "AM") {
+          alert("❌ Exit at 12 AM means next day, not allowed.");
+          newEmployees[index][field] = "";
+          return setEmployees(newEmployees);
+        } else {
+          // ✅ 12 PM allowed → show Dupur alert
+          alert("🌞 It is time to Dupur (12 PM).");
+          newEmployees[index][field] = value;
+          return setEmployees(newEmployees);
+        }
+      }
+
+      // Case: 1–9 AM → not allowed
+      if (hour >= 1 && hour <= 9 && newEmployees[index].exitPeriod === "AM") {
+        alert("❌ Exit between 1–9 AM not allowed.");
+        newEmployees[index][field] = "";
+        return setEmployees(newEmployees);
+      }
+
+      // Case: 1–11 → force PM
+      if (hour >= 1 && hour <= 11) {
+        newEmployees[index].exitPeriod = "PM";
+      }
+    }
+    newEmployees[index][field] = value;
+  }
+
+  // 🔹 Exit Period Lock
+  else if (field === "exitPeriod") {
+    const hour = parseInt(newEmployees[index].exitHour, 10);
+    // Prevent AM for 1–11
+    if (hour >= 1 && hour <= 11 && value === "AM") {
+      alert("❌ Exit between 1–11 can only be PM.");
+      return;
+    }
+    // Prevent 12 AM
+    if (hour === 12 && value === "AM") {
+      alert("❌ Exit at 12 AM means next day, not allowed.");
+      return;
+    }
+    // Show Dupur alert if 12 PM
+    if (hour === 12 && value === "PM") {
+      alert("🌞 It is time to Dupur (12 PM).");
+    }
+    newEmployees[index][field] = value;
+  }
+
+  // 🔹 Default
+  else {
+    newEmployees[index][field] = value;
+  }
+
+  setEmployees(newEmployees);
+};
+
 
   const handleUpdate = async () => {
     try {
@@ -182,7 +256,7 @@ const AttendanceSheet = () => {
             />
             <Form.Select
               value={employee.startPeriod}
-              onChange={(e) => handleInputChange(e, index, "startPeriod")}
+              disabled   // 🔒 Disable manual change
              className="w-100 w-sm-50"
              style={{ minWidth: "80px",maxWidth: "80px" }}
             >
