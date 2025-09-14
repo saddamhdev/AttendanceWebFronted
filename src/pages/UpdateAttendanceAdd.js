@@ -11,12 +11,7 @@ const AttendanceSheet = () => {
   const [loading, setLoading] = useState(false);
   const [oldData, setOldData] = useState([]);
 
-  useEffect(() => {
-    if (selectedDate) {
-      fetchEmployees();
-    }
-  }, [selectedDate]);
-
+ 
   const fetchEmployees = async () => {
     setLoading(true);
     try {
@@ -94,22 +89,27 @@ const AttendanceSheet = () => {
     <Navbar />
     <div className="container mt-4" style={{ paddingTop: "100px" }}>
       {/* Date Controls */}
+      {/* Date Controls */}
       <div className="d-flex flex-column flex-md-row align-items-stretch align-items-md-center mb-3 gap-2">
-          <Button variant="secondary" onClick={() => changeDate(-1)}>
-            {"<"}
-          </Button>
+        <Button variant="secondary" onClick={() => changeDate(-1)}>
+          {"<"}
+        </Button>
 
-          <Form.Control 
-            type="date" 
-            value={selectedDate} 
-            onChange={handleDateChange} 
-          />
+        <Form.Control 
+          type="date" 
+          value={selectedDate} 
+          onChange={handleDateChange} 
+        />
 
+        <Button variant="primary" onClick={fetchEmployees}>
+          Search
+        </Button>
 
-          <Button variant="secondary" onClick={() => changeDate(1)}>
-            {">"}
-          </Button>
-        </div>
+        <Button variant="secondary" onClick={() => changeDate(1)}>
+          {">"}
+        </Button>
+      </div>
+
 
   
       {/* Header Info */}
