@@ -73,7 +73,7 @@ const AttendanceReport = () => {
     setLoading(true);
     try {
       const response = await getAllAtAGlanceDataSingle( startDate, endDate);
-     
+      console.log("Fetched At A Glance Data:", response);
       setUserAtAGlanceData(response);
     } catch (error) {
       console.error("Error fetching user at a glance data:", error);

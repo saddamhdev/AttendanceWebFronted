@@ -214,7 +214,7 @@ const AttendanceReport = () => {
           <tr className="text-white text-center fw-bold">
             <td style={{ backgroundColor: '#F2B6B6', color: '#000' }}>Short Time</td>
             <td style={{ backgroundColor: '#C2E0C2', color: '#000' }}>Regular Time</td>
-            <td style={{ backgroundColor: '#226622' }}>Extra Time</td>
+            <td style={{ backgroundColor: '#226622' }}>Extra Day</td>
           </tr>
           <tr className="text-center">
             <td >{userAtAGlanceData.shortTime}</td>
