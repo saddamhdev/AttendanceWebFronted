@@ -157,7 +157,7 @@ return (
               <th>Holiday</th>
               <th>Short Time</th>
               <th>Required Time</th>
-              <th>Extra Time</th>
+              <th>Extra Days</th>
               <th>Entry In Time</th>
               <th>Entry Late</th>
               <th>Entry Total Late</th>
