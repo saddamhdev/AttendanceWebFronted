@@ -2,8 +2,6 @@ pipeline {
     agent any
 
     environment {
-        PROD_USER   = "root"
-        PROD_HOST   = "159.89.172.251"
         REMOTE_DIR  = "/www/wwwroot/CITSNVN/attendance/reactFronted"
         NODE_VERSION = "22.14.0"
         PORT        = "3082"
@@ -22,12 +20,12 @@ pipeline {
 
         stage('Verify Credentials') {
             steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'DO_SSH_PASSWORD',
-                    usernameVariable: 'SSH_USER',
-                    passwordVariable: 'SSH_PASS'
-                )]) {
-                    echo "🟢 SSH Password OK"
+                withCredentials([
+                    string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USER'),
+                    string(credentialsId: 'SSH_PASSWORD', variable: 'SSH_PASS'),
+                    string(credentialsId: 'SSH_HOST',     variable: 'SSH_HOST')
+                ]) {
+                    echo "🟢 SSH Credentials Loaded Successfully"
                 }
             }
         }
@@ -84,57 +82,51 @@ pipeline {
         stage('Deploy to VPS') {
             when { expression { params.DEPLOY } }
             steps {
-                script {
+                withCredentials([
+                    string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USER'),
+                    string(credentialsId: 'SSH_PASSWORD', variable: 'SSH_PASS'),
+                    string(credentialsId: 'SSH_HOST',     variable: 'SSH_HOST')
+                ]) {
+                    script {
 
-                    echo "🔐 Connecting and deploying..."
+                        echo "🔐 Connecting and Deploying..."
 
-                    // -----------------------------------------
-                    // 1️⃣ Kill old process on remote server
-                    // -----------------------------------------
-                    sh '''
-                        sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no ${PROD_USER}@${PROD_HOST} \
-                        "lsof -t -i:${PORT} | xargs -r kill -9 || echo '⚠️ No running process'"
-                    '''
+                        // 1️⃣ Kill old process
+                        sh '''
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
+                            "lsof -t -i:${PORT} | xargs -r kill -9 || echo '⚠️ No running process found'"
+                        '''
 
-                    // -----------------------------------------
-                    // 2️⃣ Backup existing build
-                    // -----------------------------------------
-                    sh '''
-                        sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no ${PROD_USER}@${PROD_HOST} \
-                        "cd ${REMOTE_DIR} && rm -rf build.bak && mv build build.bak 2>/dev/null || true"
-                    '''
+                        // 2️⃣ Backup old build
+                        sh '''
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
+                            "cd ${REMOTE_DIR} && rm -rf build.bak && mv build build.bak 2>/dev/null || true"
+                        '''
 
-                    // -----------------------------------------
-                    // 3️⃣ Upload new build
-                    // -----------------------------------------
-                    sh '''
-                        sshpass -p "$SSH_PASS" scp -o StrictHostKeyChecking=no \
-                        build.tar.gz ${PROD_USER}@${PROD_HOST}:${REMOTE_DIR}/
-                    '''
+                        // 3️⃣ Upload new build
+                        sh '''
+                            sshpass -p "$SSH_PASS" scp -o StrictHostKeyChecking=no \
+                            build.tar.gz $SSH_USER@$SSH_HOST:${REMOTE_DIR}/
+                        '''
 
-                    // -----------------------------------------
-                    // 4️⃣ Extract and replace build
-                    // -----------------------------------------
-                    sh '''
-                        sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no ${PROD_USER}@${PROD_HOST} \
-                        "cd ${REMOTE_DIR} && rm -rf build && mkdir build && tar xzf build.tar.gz -C build && rm -f build.tar.gz"
-                    '''
+                        // 4️⃣ Extract new build
+                        sh '''
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
+                            "cd ${REMOTE_DIR} && rm -rf build && mkdir build && tar xzf build.tar.gz -C build && rm build.tar.gz"
+                        '''
 
-                    // -----------------------------------------
-                    // 5️⃣ Start new React app
-                    // -----------------------------------------
-                    sh '''
-                        sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no ${PROD_USER}@${PROD_HOST} \
-                        "cd ${REMOTE_DIR}/build && nohup npx serve -s . -l ${PORT} > serve.log 2>&1 &"
-                    '''
+                        // 5️⃣ Start app using serve
+                        sh '''
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
+                            "cd ${REMOTE_DIR}/build && nohup npx serve -s . -l ${PORT} > serve.log 2>&1 &"
+                        '''
 
-                    // -----------------------------------------
-                    // 6️⃣ Verify deployment
-                    // -----------------------------------------
-                    sh '''
-                        sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no ${PROD_USER}@${PROD_HOST} \
-                        "[ -d ${REMOTE_DIR}/build ] && echo '✅ Deployment Success' || (echo '❌ Failed — Rolling back' && mv ${REMOTE_DIR}/build.bak ${REMOTE_DIR}/build)"
-                    '''
+                        // 6️⃣ Verify deployment
+                        sh '''
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
+                            "[ -d ${REMOTE_DIR}/build ] && echo '✅ Deployment Success' || (echo '❌ Failed — Rolling back' && mv ${REMOTE_DIR}/build.bak ${REMOTE_DIR}/build)"
+                        '''
+                    }
                 }
             }
         }
