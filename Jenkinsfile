@@ -114,16 +114,46 @@ pipeline {
                             "cd ${REMOTE_DIR} && rm -rf build && mkdir build && tar xzf build.tar.gz -C build"
                         '''
 
-                        // Start application with serve
+                        // Install serve globally on VPS (if not already installed)
                         sh '''
                             sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
-                            "cd ${REMOTE_DIR}/build && nohup npx serve -s . -l ${PORT} > serve.log 2>&1 &"
+                            "npm install -g serve 2>&1 || true"
+                        '''
+
+                        // Start application with serve and capture output
+                        sh '''
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
+                            "cd ${REMOTE_DIR}/build && nohup serve -s . -l ${PORT} > ${REMOTE_DIR}/serve.log 2>&1 &" && sleep 2
+                        '''
+
+                        // Check if process is running
+                        sh '''
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
+                            "ps aux | grep serve | grep -v grep && echo '✅ Serve process is running' || echo '⚠️  Check serve.log for errors'"
+                        '''
+
+                        // Show last few lines of serve.log
+                        sh '''
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
+                            "[ -f ${REMOTE_DIR}/serve.log ] && tail -20 ${REMOTE_DIR}/serve.log || echo 'No log file found'"
                         '''
 
                         // Verify deployment
                         sh '''
                             sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
-                            "[ -d ${REMOTE_DIR}/build ] && echo '✅ Deployment Success' || echo '❌ Deployment Failed'"
+                            "[ -d ${REMOTE_DIR}/build ] && echo '✅ Build directory exists' || echo '❌ Build directory missing'"
+                        '''
+
+                        // Check if serve process is running
+                        sh '''
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
+                            "lsof -i :${PORT} | grep LISTEN > /dev/null && echo '✅ Service is listening on port ${PORT}' || echo '❌ Service not listening'"
+                        '''
+
+                        // Show deployment info
+                        sh '''
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
+                            "echo '📊 Deployment Info:' && echo 'App URL: http://${SSH_HOST}:${PORT}' && tail -5 ${REMOTE_DIR}/serve.log"
                         '''
                     }
                 }
