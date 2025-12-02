@@ -23,16 +23,17 @@ pipeline {
         stage('Verify Credentials') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'SSH_PASSWORD', variable: 'SSH_PASS')
+                    usernamePassword(credentialsId: 'DO_SSH_PASSWORD',
+                                     usernameVariable: 'SSH_USER_VAR',
+                                     passwordVariable: 'SSH_PASS')
                 ]) {
-                    echo "🟢 SSH Password Loaded Successfully"
+                    echo "🟢 Credentials OK for $SSH_USER_VAR"
                 }
             }
         }
 
         stage('Checkout') {
             steps {
-                echo '📥 Checking out source code...'
                 checkout scm
             }
         }
@@ -47,8 +48,6 @@ pipeline {
                     . "$NVM_DIR/nvm.sh"
                     nvm install ${NODE_VERSION}
                     nvm use ${NODE_VERSION}
-                    node -v
-                    npm -v
                 '''
             }
         }
@@ -82,45 +81,43 @@ pipeline {
         stage('Deploy to VPS') {
             when { expression { params.DEPLOY } }
             steps {
-                withCredentials([string(credentialsId: 'SSH_PASSWORD', variable: 'SSH_PASS')]) {
+                withCredentials([
+                    usernamePassword(credentialsId: 'DO_SSH_PASSWORD',
+                                     usernameVariable: 'SSH_USER_VAR',
+                                     passwordVariable: 'SSH_PASS')
+                ]) {
                     script {
 
-                        echo "🔐 Connecting and Deploying..."
+                        echo "🔐 Deploying to VPS..."
 
-                        // 1️⃣ Kill old process
                         sh '''
                             sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
-                            "lsof -t -i:${PORT} | xargs -r kill -9 || echo '⚠️ No running process found'"
+                            "lsof -t -i:${PORT} | xargs -r kill -9 || true"
                         '''
 
-                        // 2️⃣ Backup old build
                         sh '''
                             sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
                             "cd ${REMOTE_DIR} && rm -rf build.bak && mv build build.bak 2>/dev/null || true"
                         '''
 
-                        // 3️⃣ Upload new build
                         sh '''
                             sshpass -p "$SSH_PASS" scp -o StrictHostKeyChecking=no \
                             build.tar.gz $SSH_USER@$SSH_HOST:${REMOTE_DIR}/
                         '''
 
-                        // 4️⃣ Extract new build
                         sh '''
                             sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
-                            "cd ${REMOTE_DIR} && rm -rf build && mkdir build && tar xzf build.tar.gz -C build && rm build.tar.gz"
+                            "cd ${REMOTE_DIR} && rm -rf build && mkdir build && tar xzf build.tar.gz -C build"
                         '''
 
-                        // 5️⃣ Start React app
                         sh '''
                             sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
                             "cd ${REMOTE_DIR}/build && nohup npx serve -s . -l ${PORT} > serve.log 2>&1 &"
                         '''
 
-                        // 6️⃣ Verify deployment
                         sh '''
                             sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
-                            "[ -d ${REMOTE_DIR}/build ] && echo '✅ Deployment Success' || (echo '❌ Failed — Rolling back' && mv ${REMOTE_DIR}/build.bak ${REMOTE_DIR}/build)"
+                            "[ -d ${REMOTE_DIR}/build ] && echo '✅ Deployment Success' || echo '❌ Deployment Failed'"
                         '''
                     }
                 }
