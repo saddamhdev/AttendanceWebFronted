@@ -2,13 +2,13 @@ pipeline {
     agent any
 
     environment {
-        SSH_KEY     = credentials('DO_SSH_KEY')
-        DO_HOST     = credentials('DO_HOST')
-        DO_USER     = credentials('DO_USER')
-        REMOTE_DIR  = '/www/wwwroot/CITSNVN/attendance/reactFronted'
+        SSH_USER     = credentials('DO_USER')          // Username only
+        SSH_PASS     = credentials('DO_SSH_PASSWORD')  // Password only
+        DO_HOST      = credentials('DO_HOST')          // Host only
+        REMOTE_DIR   = '/www/wwwroot/CITSNVN/attendance/reactFronted'
         NODE_VERSION = '22.14.0'
-        PORT        = '3082'
-        NVM_DIR     = "${WORKSPACE}/.nvm"
+        PORT         = '3082'
+        NVM_DIR      = "${WORKSPACE}/.nvm"
     }
 
     parameters {
@@ -20,6 +20,7 @@ pipeline {
     }
 
     stages {
+
         stage('Checkout') {
             steps {
                 echo '📥 Checking out source code...'
@@ -29,11 +30,12 @@ pipeline {
 
         stage('Install Node.js via NVM') {
             steps {
-                echo "📦 Installing Node.js ${NODE_VERSION} via NVM..."
                 sh '''
+                    echo "📦 Installing Node ${NODE_VERSION}..."
                     export NVM_DIR="${NVM_DIR}"
                     mkdir -p "$NVM_DIR"
                     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+
                     . "$NVM_DIR/nvm.sh"
                     nvm install ${NODE_VERSION}
                     nvm use ${NODE_VERSION}
@@ -58,7 +60,7 @@ pipeline {
                 sh '''
                     . "${NVM_DIR}/nvm.sh"
                     nvm use ${NODE_VERSION}
-                    npm run lint || echo "⚠️ ESLint completed with warnings (ignored)"
+                    npm run lint || echo "⚠️ ESLint warnings ignored"
                 '''
             }
         }
@@ -75,7 +77,7 @@ pipeline {
 
         stage('Archive Build') {
             steps {
-                echo '📦 Creating build archive...'
+                echo '📦 Creating build.tar.gz...'
                 sh 'tar czf build.tar.gz -C build .'
             }
         }
@@ -86,67 +88,51 @@ pipeline {
             }
             steps {
                 script {
-                    def remote = [
-                        name: 'do-server',
-                        host: "${DO_HOST}",
-                        user: "${DO_USER}",
-                        identityFile: "${SSH_KEY}",
-                        allowAnyHosts: true
-                    ]
-
                     try {
-                        echo '🔐 Connecting and deploying to remote server...'
 
-                        sshCommand remote: remote, command: """
-                            echo '🔪 Killing process on port ${PORT}...'
-                            PID=\$(lsof -t -i:${PORT})
-                            if [ -n "\$PID" ]; then
-                                kill -9 \$PID && echo '✅ Process killed.'
-                            else
-                                echo '⚠️ No process running.'
-                            fi
+                        echo "🔐 Connecting to server via SSH..."
 
-                            cd ${REMOTE_DIR}
-                            echo '📦 Backing up old build...'
-                            rm -rf build.bak
-                            mv build build.bak || echo 'No previous build found.'
+                        // 🔪 Kill existing process
+                        sh """
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$DO_HOST \
+                            "lsof -t -i:${PORT} | xargs -r kill -9 || echo '⚠️ No running process found'"
                         """
 
-                        echo '📤 Uploading build archive...'
-                        sshPut remote: remote, from: 'build.tar.gz', into: "${REMOTE_DIR}/"
-
-                        sshCommand remote: remote, command: """
-                            cd ${REMOTE_DIR}
-                            mkdir -p build
-                            tar xzf build.tar.gz -C build
-                            rm build.tar.gz
-                            echo '✅ Build extracted.'
+                        // 🧹 Prepare remote directory
+                        sh """
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$DO_HOST \
+                            "cd ${REMOTE_DIR} && rm -rf build.bak && mv build build.bak 2>/dev/null || true"
                         """
 
-                        echo '🚀 Starting React app on port ${PORT}...'
-                        sshCommand remote: remote, command: """
-                            cd ${REMOTE_DIR}/build
-                            nohup npx serve -s . -l ${PORT} > serve.log 2>&1 &
-                            echo '✅ App started.'
+                        // 📤 Upload build
+                        echo "📤 Uploading build.tar.gz..."
+                        sh """
+                            sshpass -p "$SSH_PASS" scp -o StrictHostKeyChecking=no build.tar.gz \
+                            $SSH_USER@$DO_HOST:${REMOTE_DIR}/
                         """
 
-                        echo '✅ Verifying deployment...'
-                        sshCommand remote: remote, command: """
-                            cd ${REMOTE_DIR}
-                            if [ ! -d build ]; then
-                                echo '❌ Deployment failed. Rolling back...'
-                                mv build.bak build
-                                echo '🔁 Rollback complete.'
-                            else
-                                echo '✅ Deployment successful.'
-                            fi
+                        // 📦 Extract new build
+                        sh """
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$DO_HOST \
+                            "cd ${REMOTE_DIR} && mkdir -p build && tar xzf build.tar.gz -C build && rm build.tar.gz"
+                        """
+
+                        // 🚀 Start React App
+                        sh """
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$DO_HOST \
+                            "cd ${REMOTE_DIR}/build && nohup npx serve -s . -l ${PORT} > serve.log 2>&1 &"
+                        """
+
+                        // 🔍 Verify deployment
+                        sh """
+                            sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$DO_HOST \
+                            "cd ${REMOTE_DIR} && [ -d build ] && echo '✅ Deployment successful' || (echo '❌ Failed, rolling back...' && mv build.bak build)"
                         """
 
                     } catch (Exception e) {
-                        echo "❌ Deployment failed with error: ${e.message}"
+                        echo "❌ Deployment failed: ${e.message}"
                         currentBuild.result = 'FAILURE'
                     } finally {
-                        echo '🧹 Cleaning up build archive...'
                         sh 'rm -f build.tar.gz'
                     }
                 }
