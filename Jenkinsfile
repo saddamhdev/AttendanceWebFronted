@@ -16,6 +16,7 @@ pipeline {
 
     options {
         timestamps()
+        buildDiscarder(logRotator(numToKeepStr: '10'))
     }
 
     stages {
@@ -87,34 +88,39 @@ pipeline {
                                      passwordVariable: 'SSH_PASS')
                 ]) {
                     script {
-
                         echo "🔐 Deploying to VPS..."
 
+                        // Kill existing process on the port
                         sh '''
                             sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
                             "lsof -t -i:${PORT} | xargs -r kill -9 || true"
                         '''
 
+                        // Backup current build
                         sh '''
                             sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
                             "cd ${REMOTE_DIR} && rm -rf build.bak && mv build build.bak 2>/dev/null || true"
                         '''
 
+                        // Copy build archive to server
                         sh '''
                             sshpass -p "$SSH_PASS" scp -o StrictHostKeyChecking=no \
                             build.tar.gz $SSH_USER@$SSH_HOST:${REMOTE_DIR}/
                         '''
 
+                        // Extract build archive
                         sh '''
                             sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
                             "cd ${REMOTE_DIR} && rm -rf build && mkdir build && tar xzf build.tar.gz -C build"
                         '''
 
+                        // Start application with serve
                         sh '''
                             sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
                             "cd ${REMOTE_DIR}/build && nohup npx serve -s . -l ${PORT} > serve.log 2>&1 &"
                         '''
 
+                        // Verify deployment
                         sh '''
                             sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
                             "[ -d ${REMOTE_DIR}/build ] && echo '✅ Deployment Success' || echo '❌ Deployment Failed'"
@@ -126,7 +132,14 @@ pipeline {
     }
 
     post {
-        success { echo "✅ React Deployment Completed Successfully!" }
-        failure { echo "❌ Deployment Failed!" }
+        success { 
+            echo "✅ React Deployment Completed Successfully!"
+        }
+        failure { 
+            echo "❌ Deployment Failed!"
+        }
+        cleanup {
+            cleanWs()
+        }
     }
 }
