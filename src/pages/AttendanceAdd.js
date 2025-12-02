@@ -18,7 +18,7 @@ const AttendanceSheet = () => {
 
   // 🔥 SUCCESS SOUND
   const playSuccessSound = () => {
-    const audio = new Audio("/audio.mp3");
+    const audio = new Audio("/audos.mp3");
     audio.play();
   };
 

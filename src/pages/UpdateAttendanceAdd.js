@@ -17,7 +17,7 @@ const AttendanceSheet = () => {
 
   // 🔥 SUCCESS SOUND
   const playSuccessSound = () => {
-    const audio = new Audio("/update30.mp3");  // keep same mp3
+    const audio = new Audio("/audos.mp3");  // keep same mp3
     audio.play();
   };
 
@@ -33,7 +33,7 @@ const AttendanceSheet = () => {
     setLoading(true);  // SHOW SEARCH MODAL LOADER
     try {
       const response = await getAttendanceDataForFixDay(selectedDate);
-
+      console.log("Fetched attendance data:", response);
       setEmployees(Array.isArray(response) && response.length > 0 ? response : []);
       setOldData(JSON.parse(JSON.stringify(Array.isArray(response) && response.length > 0 ? response : [])));
     } catch (error) {
