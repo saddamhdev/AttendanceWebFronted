@@ -2,10 +2,12 @@ pipeline {
     agent any
 
     environment {
-        REMOTE_DIR  = "/www/wwwroot/CITSNVN/attendance/reactFronted"
+        SSH_USER   = "root"
+        SSH_HOST   = "159.89.172.251"
+        REMOTE_DIR = "/www/wwwroot/CITSNVN/attendance/reactFronted"
         NODE_VERSION = "22.14.0"
-        PORT        = "3082"
-        NVM_DIR     = "${WORKSPACE}/.nvm"
+        PORT       = "3082"
+        NVM_DIR    = "${WORKSPACE}/.nvm"
     }
 
     parameters {
@@ -21,11 +23,9 @@ pipeline {
         stage('Verify Credentials') {
             steps {
                 withCredentials([
-                    string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USER'),
-                    string(credentialsId: 'SSH_PASSWORD', variable: 'SSH_PASS'),
-                    string(credentialsId: 'SSH_HOST',     variable: 'SSH_HOST')
+                    string(credentialsId: 'SSH_PASSWORD', variable: 'SSH_PASS')
                 ]) {
-                    echo "🟢 SSH Credentials Loaded Successfully"
+                    echo "🟢 SSH Password Loaded Successfully"
                 }
             }
         }
@@ -82,11 +82,7 @@ pipeline {
         stage('Deploy to VPS') {
             when { expression { params.DEPLOY } }
             steps {
-                withCredentials([
-                    string(credentialsId: 'SSH_USERNAME', variable: 'SSH_USER'),
-                    string(credentialsId: 'SSH_PASSWORD', variable: 'SSH_PASS'),
-                    string(credentialsId: 'SSH_HOST',     variable: 'SSH_HOST')
-                ]) {
+                withCredentials([string(credentialsId: 'SSH_PASSWORD', variable: 'SSH_PASS')]) {
                     script {
 
                         echo "🔐 Connecting and Deploying..."
@@ -115,7 +111,7 @@ pipeline {
                             "cd ${REMOTE_DIR} && rm -rf build && mkdir build && tar xzf build.tar.gz -C build && rm build.tar.gz"
                         '''
 
-                        // 5️⃣ Start app using serve
+                        // 5️⃣ Start React app
                         sh '''
                             sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST \
                             "cd ${REMOTE_DIR}/build && nohup npx serve -s . -l ${PORT} > serve.log 2>&1 &"
