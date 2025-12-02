@@ -4,12 +4,13 @@ on:
   push:
     branches:
       - main
+
   workflow_dispatch:
     inputs:
       deploy:
-        description: 'Deploy to server after build?'
+        description: "Deploy to server after build?"
         required: true
-        default: 'false'
+        default: "false"
 
 jobs:
   build:
@@ -19,7 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22.13.1
@@ -27,10 +28,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run ESLint
-        run: npm run lint || echo "ESLint completed with warnings"
+      - name: Lint
+        run: npm run lint || echo "ESLint warnings only"
 
-      - name: Build React app
+      - name: Build
         run: CI=false npm run build
 
       - name: Upload build artifact
@@ -51,63 +52,65 @@ jobs:
           name: react-build
           path: build/
 
-      - name: Set up SSH key and known_hosts
+      - name: Prepare SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.DO_SSH_KEY }}" > ~/.ssh/key.pem
           chmod 600 ~/.ssh/key.pem
-          ssh-keyscan -H ${{ secrets.DO_HOST }} >> ~/.ssh/do_known_hosts
+          ssh-keyscan -H ${{ secrets.DO_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Upload new build to DigitalOcean
+      - name: Backup existing build
         run: |
-          ssh -i ~/.ssh/key.pem \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=~/.ssh/do_known_hosts \
-            ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} "
-              echo '🔪 Killing process on port 3082...'
-              PORT=3082
-              PID=\$(lsof -t -i:\$PORT)
-              if [ -n \"\$PID\" ]; then
-                kill -9 \$PID && echo '✅ Process on port \$PORT killed.'
-              else
-                echo '⚠️ No process found on port \$PORT.'
-              fi
+          ssh -i ~/.ssh/key.pem ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} "
+            set -e
+            cd /www/wwwroot/snvn.deepseahost.com/reactjs
 
-              cd /www/wwwroot/snvn.deepseahost.com/reactjs
-              echo '📦 Backing up current build...'
-              mv build build.bak || echo 'No previous build to back up'
-            "
+            echo '🗂 Listing existing build...'
+            ls -lah
 
-          scp -i ~/.ssh/key.pem \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=~/.ssh/do_known_hosts \
-            -r build \
+            echo '📦 Creating backup build...'
+            rm -rf build.bak
+            mv build build.bak 2>/dev/null || echo '⚠️ No previous build to backup.'
+          "
+
+      - name: Upload new build
+        run: |
+          scp -i ~/.ssh/key.pem -r build \
             ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }}:/www/wwwroot/snvn.deepseahost.com/reactjs/
 
-      - name: Start server on port 3082
+      - name: Restart server (port 3082)
         run: |
-          ssh -i ~/.ssh/key.pem \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=~/.ssh/do_known_hosts \
-            ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} "
-              cd /www/wwwroot/snvn.deepseahost.com/reactjs/build
-              echo '🚀 Starting React app on port 3082...'
-              nohup npx serve -s . -l 3082 > serve.log 2>&1 &
-              echo '✅ React app started on port 3082.'
-            "
+          ssh -i ~/.ssh/key.pem ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} "
+            cd /www/wwwroot/snvn.deepseahost.com/reactjs/build
 
-      - name: Rollback logic
+            echo '🔪 Killing previous process on port 3082...'
+            PID=\$(lsof -t -i:3082)
+            if [ -n \"\$PID\" ]; then kill -9 \$PID; fi
+
+            echo '🚀 Starting server on port 3082...'
+            nohup npx serve -s . -l 3082 > serve.log 2>&1 &
+            sleep 3
+          "
+
+      - name: Verify deployment & Rollback if failed
         run: |
-          ssh -i ~/.ssh/key.pem \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=~/.ssh/do_known_hosts \
-            ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} "
+          ssh -i ~/.ssh/key.pem ${{ secrets.DO_USER }}@${{ secrets.DO_HOST }} "
+            echo '🩺 Health check on port 3082...'
+
+            curl -I http://localhost:3082 2>/dev/null | head -n 1 | grep '200' >/dev/null
+            if [ \$? -ne 0 ]; then
+              echo '❌ Health check failed! Rolling back...'
+
               cd /www/wwwroot/snvn.deepseahost.com/reactjs
-              if [ ! -d build ]; then
-                echo '❌ Deployment failed. Rolling back...'
-                mv build.bak build
-                echo '🔁 Rollback complete.'
-              else
-                echo '✅ Deployment successful.'
-              fi
-            "
+              rm -rf build
+              mv build.bak build
+
+              echo '🔁 Rollback complete. Restarting server...'
+
+              cd build
+              nohup npx serve -s . -l 3082 > serve.log 2>&1 &
+              exit 1
+            else
+              echo '✅ Deployment successful!'
+            fi
+          "
