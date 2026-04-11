@@ -133,7 +133,7 @@ const AttendanceSheet = () => {
       const response = await updateAttendance(employees, oldData);
 
       setShowToast(true);           // show toast
-      playSuccessSound();           // play sound
+     // playSuccessSound();           // play sound
 
       //alert(response);              // keep your existing alert
       await fetchEmployees();       // refresh data

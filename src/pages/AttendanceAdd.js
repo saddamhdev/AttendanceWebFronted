@@ -147,7 +147,7 @@ const AttendanceSheet = () => {
       const response = await saveAttendance(employees);
 
       setShowToast(true);       // show toast
-      playSuccessSound();       // play ding sound
+     // playSuccessSound();       // play ding sound
       //alert(response.message);  // keep your alert
     } 
     catch (error) {
